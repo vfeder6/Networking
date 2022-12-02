@@ -18,7 +18,7 @@ struct HTTPResponse {
     let urlResponse: URLResponse
 }
 
-enum NewNetworkError: Error {
+enum NetworkError: Error {
     case badURLResponse
     case mismatchingStatusCodes(expected: Int, actual: Int)
     case notDecodableData
@@ -27,7 +27,7 @@ enum NewNetworkError: Error {
     case mismatchingRequestedResponseType
 }
 
-struct FullHTTPResponse<Body: Decodable> {
+struct NetworkResponse<Body: Decodable> {
     let headers: [String : String]
     let body: Body?
 }
