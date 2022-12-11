@@ -93,3 +93,14 @@ extension NetworkClient {
         host.appendingPathExtension(endpoint).appending(queryItems: queryItems)
     }
 }
+
+extension Result where Failure == NetworkError {
+    var displayable: Result<Success, DisplayableError> {
+        switch self {
+        case .success(let success):
+            return .success(success)
+        case .failure(let failure):
+            return .failure(.from(failure))
+        }
+    }
+}

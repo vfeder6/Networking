@@ -30,8 +30,8 @@ struct ExampleService {
 
         switch result {
         case .success(let response):
-            if response.headers["SomeHeaderKey"] == "SomeHeaderValue" {
-                return .success(response.body!)
+            if response.headers["SomeHeaderKey"] == "SomeHeaderValue", let body = response.body {
+                return .success(body)
             }
             return .failure(.server)
 
@@ -39,41 +39,43 @@ struct ExampleService {
             return .failure(error)
         }
     }
-}
 
+    func requestWithBody(_ body: ExampleRequest) async -> Result<ExampleResponse, DisplayableError> {
+        return await networkService.performRequest(
+            to: "requestWithBody",
+            body: body,
+            decodeTo: ExampleResponse.self
+        ).displayable
+    }
 
+    func parameterizedEndpoint(_ parameter: ParameterizedEndpoint) async -> Result<Void, DisplayableError> {
+        return await networkService.emptyResponse(
+            from: "parameterizedEndpoint/\(parameter.rawValue)",
+            method: .get,
+            expect: 200
+        ).displayable
+    }
 
-extension Result where Failure == NetworkError {
-    var displayable: Result<Success, DisplayableError> {
-        switch self {
-        case .success(let success):
-            return .success(success)
-        case .failure(let failure):
-            return .failure(.from(failure))
-        }
+    func variableBody(_ parameter: VariableBodyParameter) async -> Result<Void, DisplayableError> {
+        return await networkService.emptyResponse(
+            from: "variableBody/\(parameter.rawValue)",
+            body: VariableBody(parameter: parameter),
+            method: .post,
+            expect: 200
+        ).displayable
     }
 }
 
-//extension Result where Success == NetworkResponse, Failure == DisplayableError {
-//    func expectHeaders(_ headers: [String: String], else: DisplayableError) -> Self {
-//        switch self {
-//        case .success(let success):
-//            <#code#>
-//
-//        case .failure(let failure):
-//            <#code#>
-//        }
-//    }
-//}
-//
-//struct AnyDecodable: Decodable {
-//    let decodeFunction: () -> Decodable
-//
-//    init(_ decodable: Decodable) {
-//        decodeFunction = { decodable }
-//    }
-//
-//    init(from decoder: Decoder) throws {
-//        self = .init(<#T##decodable: Decodable##Decodable#>)
-//    }
-//}
+enum ParameterizedEndpoint: String {
+    case first
+    case second
+}
+
+struct VariableBody: Encodable {
+    let parameter: VariableBodyParameter
+}
+
+enum VariableBodyParameter: String, Encodable {
+    case first
+    case second
+}
