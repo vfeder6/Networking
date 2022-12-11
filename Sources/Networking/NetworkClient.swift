@@ -14,16 +14,6 @@ protocol NetworkClientProtocol {
         expect statusCode: Int,
         decodeTo type: Response.Type?
     ) async throws -> NetworkResponse<Response>
-
-//    func performRequest<Response: Decodable>(
-//        to endpoint: String,
-//        with queryItems: [URLQueryItem],
-//        body: (any Encodable)?,
-//        method: HTTPMethod,
-//        additionalHeaders: [String: String],
-//        expect statusCode: Int,
-//        decodeTo type: Response.Type?
-//    ) async throws -> Response?
 }
 
 struct NetworkClient: NetworkClientProtocol {
@@ -63,31 +53,6 @@ struct NetworkClient: NetworkClientProtocol {
         let response = try await requestExecutor.perform(request: request)
         return try process(response: response, expecting: statusCode, responseType: type)
     }
-
-//    func performRequest<Response: Decodable>(
-//        to endpoint: String,
-//        with queryItems: [URLQueryItem] = [],
-//        body: (any Encodable)?,
-//        method: HTTPMethod,
-//        additionalHeaders: [String: String] = [:],
-//        expect statusCode: Int,
-//        decodeTo type: Response.Type?
-//    ) async throws -> Response? {
-//        let responseBody = try await performRequest(
-//            to: endpoint,
-//            with: queryItems,
-//            body: body,
-//            method: method,
-//            additionalHeaders: additionalHeaders,
-//            expect: statusCode,
-//            decodeTo: type
-//        ).body
-//
-//        if type == nil && responseBody != nil || type != nil && responseBody == nil {
-//            throw NetworkError.mismatchingRequestedResponseType
-//        }
-//        return responseBody
-//    }
 }
 
 extension NetworkClient {

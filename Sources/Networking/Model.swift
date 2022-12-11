@@ -25,6 +25,7 @@ enum NetworkError: Error {
     case notParseableHeaders
     case notEncodableData
     case mismatchingRequestedResponseType
+    case unknown
 }
 
 struct NetworkResponse<Body: Decodable> {
