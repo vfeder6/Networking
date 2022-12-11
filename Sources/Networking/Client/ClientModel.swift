@@ -2,7 +2,7 @@ struct ExampleRequest: Encodable {
 
 }
 
-struct ExampleResponse: Decodable {
+struct ExampleResponse: Decodable, Equatable {
 
 }
 

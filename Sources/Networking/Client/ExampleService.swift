@@ -1,6 +1,17 @@
 import Foundation
 
-struct ExampleService {
+protocol ExampleServiceProtocol {
+    var networkService: NetworkService { get }
+
+    func returnsAModel() async -> Result<ExampleResponse, DisplayableError>
+    func returnsAnEmptyResponse() async -> Result<Void, DisplayableError>
+    func checkOnResponseHeaders() async -> Result<ExampleResponse, DisplayableError>
+    func requestWithBody(_ body: ExampleRequest) async -> Result<ExampleResponse, DisplayableError>
+    func parameterizedEndpoint(_ parameter: ParameterizedEndpoint) async -> Result<Void, DisplayableError>
+    func variableBody(_ parameter: VariableBodyParameter) async -> Result<Void, DisplayableError>
+}
+
+struct ExampleService: ExampleServiceProtocol {
     let networkService: NetworkService = NetworkService(client: NetworkClient.shared)
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError> {

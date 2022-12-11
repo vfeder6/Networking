@@ -88,7 +88,11 @@ private struct Empty: Decodable { }
 
 extension NetworkClient {
     static var shared: Self {
-        .init(host: .init(string: "https://example.com")!, baseHeaders: [:])
+        .init(host: .init(string: "https://realImplementation.com")!, baseHeaders: [:])
+    }
+
+    static var mock: Self {
+        .init(host: .init(string: "https://mock.com")!, baseHeaders: [:])
     }
 }
 
