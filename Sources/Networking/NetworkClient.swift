@@ -7,12 +7,12 @@ protocol NetworkClientProtocol {
 
     func performRequest<Response: Decodable>(
         to endpoint: String,
-        with queryItems: [URLQueryItem],
+        queryItems: [URLQueryItem],
         body: (any Encodable)?,
         method: HTTPMethod,
         additionalHeaders: [String: String],
         expect statusCode: Int,
-        decodeTo type: Response.Type?
+        decode type: Response.Type?
     ) async throws -> NetworkResponse<Response>
 }
 
@@ -28,12 +28,12 @@ struct NetworkClient: NetworkClientProtocol {
 
     func performRequest<Response: Decodable>(
         to endpoint: String,
-        with queryItems: [URLQueryItem] = [],
+        queryItems: [URLQueryItem] = [],
         body: (any Encodable)?,
         method: HTTPMethod,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int,
-        decodeTo type: Response.Type?
+        decode type: Response.Type?
     ) async throws -> NetworkResponse<Response> {
         var bodyData: Data?
 

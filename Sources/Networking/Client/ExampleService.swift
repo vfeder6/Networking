@@ -15,7 +15,7 @@ struct ExampleService: ExampleServiceProtocol {
     let networkService: NetworkService = NetworkService(client: NetworkClient.shared)
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError> {
-        return await networkService.performRequest(
+        await networkService.body(
             to: "/returnsAModel",
             method: .post,
             expect: 201,
@@ -24,7 +24,7 @@ struct ExampleService: ExampleServiceProtocol {
     }
 
     func returnsAnEmptyResponse() async -> Result<Void, DisplayableError> {
-        return await networkService.emptyResponse(
+        await networkService.emptyBody(
             from: "/returnsAnEmptyResponse",
             method: .get,
             expect: 200
@@ -36,7 +36,7 @@ struct ExampleService: ExampleServiceProtocol {
             from: "checkOnResponseHeaders",
             method: .get,
             expect: 200,
-            decodeTo: ExampleResponse.self
+            decode: ExampleResponse.self
         ).displayable
 
         switch result {
@@ -52,7 +52,7 @@ struct ExampleService: ExampleServiceProtocol {
     }
 
     func requestWithBody(_ body: ExampleRequest) async -> Result<ExampleResponse, DisplayableError> {
-        return await networkService.performRequest(
+        await networkService.body(
             to: "requestWithBody",
             body: body,
             decodeTo: ExampleResponse.self
@@ -60,7 +60,7 @@ struct ExampleService: ExampleServiceProtocol {
     }
 
     func parameterizedEndpoint(_ parameter: ParameterizedEndpoint) async -> Result<Void, DisplayableError> {
-        return await networkService.emptyResponse(
+        await networkService.emptyBody(
             from: "parameterizedEndpoint/\(parameter.rawValue)",
             method: .get,
             expect: 200
@@ -68,7 +68,7 @@ struct ExampleService: ExampleServiceProtocol {
     }
 
     func variableBody(_ parameter: VariableBodyParameter) async -> Result<Void, DisplayableError> {
-        return await networkService.emptyResponse(
+        await networkService.emptyBody(
             from: "variableBody/\(parameter.rawValue)",
             body: VariableBody(parameter: parameter),
             method: .post,

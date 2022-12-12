@@ -10,24 +10,24 @@ struct NetworkService {
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int = 200,
-        decodeTo type: Response.Type
+        decode type: Response.Type
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
             return .success(try await client.performRequest(
                 to: endpoint,
-                with: queryItems,
+                queryItems: queryItems,
                 body: body,
                 method: method,
                 additionalHeaders: additionalHeaders,
                 expect: statusCode,
-                decodeTo: type
+                decode: type
             ))
         } catch {
             return .failure(.casted(from: error))
         }
     }
 
-    func performRequest<Response: Decodable>(
+    func body<Response: Decodable>(
         to endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
@@ -43,7 +43,7 @@ struct NetworkService {
             method: method,
             additionalHeaders: additionalHeaders,
             expect: statusCode,
-            decodeTo: type
+            decode: type
         )
 
         switch result {
@@ -57,7 +57,7 @@ struct NetworkService {
         }
     }
 
-    func emptyResponse(
+    func emptyBody(
         from endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
@@ -72,7 +72,7 @@ struct NetworkService {
             method: method,
             additionalHeaders: additionalHeaders,
             expect: statusCode,
-            decodeTo: Empty.self
+            decode: Empty.self
         )
 
         switch result {
@@ -88,11 +88,11 @@ private struct Empty: Decodable { }
 
 extension NetworkClient {
     static var shared: Self {
-        .init(host: .init(string: "https://realImplementation.com")!, baseHeaders: [:])
+        .init(host: .init(string: "https://shared-instance.com")!, baseHeaders: [:])
     }
 
     static var mock: Self {
-        .init(host: .init(string: "https://mock.com")!, baseHeaders: [:])
+        .init(host: .init(string: "https://mock-instance.com")!, baseHeaders: [:])
     }
 }
 
