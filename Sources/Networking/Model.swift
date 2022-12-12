@@ -28,7 +28,7 @@ enum NetworkError: Error {
     case unknown
 }
 
-struct NetworkResponse<Body: Decodable> {
+struct NetworkResponse<Body> {
     let headers: [String : String]
     let body: Body?
 }
