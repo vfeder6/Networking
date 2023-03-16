@@ -1,6 +1,6 @@
 import Foundation
 
-protocol NetworkRequestExecutorProtocol {
+public protocol NetworkRequestExecutorProtocol {
     var networkInterfaced: NetworkInterfaced { get }
 
     func perform(request: HTTPRequest) async throws -> HTTPResponse

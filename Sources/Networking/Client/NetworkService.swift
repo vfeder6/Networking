@@ -1,7 +1,11 @@
 import Foundation
 
-struct NetworkService {
+public struct NetworkService {
     let client: NetworkClientProtocol
+
+    public init(client: NetworkClientProtocol) {
+        self.client = client
+    }
 
     func response<Response: Decodable>(
         from endpoint: String,

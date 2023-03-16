@@ -1,6 +1,6 @@
 import Foundation
 
-protocol NetworkClientProtocol {
+public protocol NetworkClientProtocol {
     var requestExecutor: NetworkRequestExecutorProtocol { get }
     var host: URL { get }
     var baseHeaders: [String: String] { get }

@@ -1,19 +1,19 @@
 import Foundation
 
-enum HTTPMethod: String {
+public enum HTTPMethod: String {
     case get = "GET"
     case post = "POST"
     case patch = "PATCH"
 }
 
-struct HTTPRequest {
+public struct HTTPRequest {
     let url: URL
     let method: HTTPMethod
     let headers: [String: String]
     let body: Data?
 }
 
-struct HTTPResponse {
+public struct HTTPResponse {
     let body: Data
     let urlResponse: URLResponse
 }
@@ -28,7 +28,7 @@ enum NetworkError: Error {
     case unknown
 }
 
-struct NetworkResponse<Body> {
+public struct NetworkResponse<Body> {
     let headers: [String : String]
     let body: Body?
 }
