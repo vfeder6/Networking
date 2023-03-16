@@ -90,12 +90,12 @@ public struct NetworkService {
 
 private struct Empty: Decodable { }
 
-public extension NetworkService {
-    static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
+extension NetworkService {
+    public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
         .init(client: NetworkClient(host: host, baseHeaders: baseHeaders))
     }
 
-    static var mock: NetworkService {
+    public static var mock: NetworkService {
         .init(client: NetworkClient(host: .init(string: "https://mock-instance.com")!, baseHeaders: [:]))
     }
 }
