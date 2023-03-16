@@ -90,7 +90,7 @@ extension NetworkClient {
     }
 
     func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        host.appendingPathExtension(endpoint).appending(queryItems: queryItems)
+        host.appending(path: endpoint).appending(queryItems: queryItems)
     }
 }
 
