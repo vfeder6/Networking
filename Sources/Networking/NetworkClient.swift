@@ -16,17 +16,17 @@ public protocol NetworkClientProtocol {
     ) async throws -> NetworkResponse<Response>
 }
 
-struct NetworkClient: NetworkClientProtocol {
-    let requestExecutor: NetworkRequestExecutorProtocol = NetworkRequestExecutor()
-    let host: URL
-    let baseHeaders: [String : String]
+public struct NetworkClient: NetworkClientProtocol {
+    public let requestExecutor: NetworkRequestExecutorProtocol = NetworkRequestExecutor()
+    public let host: URL
+    public let baseHeaders: [String : String]
 
-    init(host: URL, baseHeaders: [String : String]) {
+    public init(host: URL, baseHeaders: [String : String]) {
         self.host = host
         self.baseHeaders = baseHeaders
     }
 
-    func performRequest<Response: Decodable>(
+    public func performRequest<Response: Decodable>(
         to endpoint: String,
         queryItems: [URLQueryItem] = [],
         body: (any Encodable)?,
