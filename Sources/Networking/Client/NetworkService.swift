@@ -18,7 +18,7 @@ public struct NetworkService {
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
             return .success(try await client.performRequest(
-                to: endpoint,
+                to: endpoint.prependingSlashIfNotPresent,
                 queryItems: queryItems,
                 body: body,
                 method: method,
@@ -41,7 +41,7 @@ public struct NetworkService {
         decodeTo type: Response.Type
     ) async -> Result<Response, NetworkError> {
         let result = await response(
-            from: endpoint,
+            from: endpoint.prependingSlashIfNotPresent,
             queryItems: queryItems,
             body: body,
             method: method,
@@ -70,7 +70,7 @@ public struct NetworkService {
         expect statusCode: Int = 200
     ) async -> Result<Void, NetworkError> {
         let result = await response(
-            from: endpoint,
+            from: endpoint.prependingSlashIfNotPresent,
             queryItems: queryItems,
             body: body,
             method: method,
@@ -89,6 +89,12 @@ public struct NetworkService {
 }
 
 private struct Empty: Decodable { }
+
+private extension String {
+    var prependingSlashIfNotPresent: Self {
+        starts(with: "/") ? self : "/\(self)"
+    }
+}
 
 extension NetworkService {
     public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
