@@ -3,7 +3,7 @@ import Foundation
 public struct NetworkService {
     let client: NetworkClientProtocol
 
-    public init(client: NetworkClientProtocol) {
+    init(client: NetworkClientProtocol) {
         self.client = client
     }
 
@@ -90,13 +90,13 @@ public struct NetworkService {
 
 private struct Empty: Decodable { }
 
-extension NetworkClient {
-    static var shared: Self {
-        .init(host: .init(string: "https://shared-instance.com")!, baseHeaders: [:])
+public extension NetworkService {
+    static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
+        .init(client: NetworkClient(host: host, baseHeaders: baseHeaders))
     }
 
-    static var mock: Self {
-        .init(host: .init(string: "https://mock-instance.com")!, baseHeaders: [:])
+    static var mock: NetworkService {
+        .init(client: NetworkClient(host: .init(string: "https://mock-instance.com")!, baseHeaders: [:]))
     }
 }
 

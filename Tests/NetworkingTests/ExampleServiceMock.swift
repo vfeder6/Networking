@@ -1,7 +1,7 @@
 @testable import Networking
 
 struct ExampleServiceMock: ExampleServiceProtocol {
-    let networkService: NetworkService = .init(client: NetworkClient.mock)
+    let networkService: NetworkService = .mock
 
     private let returnsAModelBehavior: ReturnsAModelBehavior
     private let returnsAnEmptyResponseBehavior: ReturnsAnEmptyResponseBehavior

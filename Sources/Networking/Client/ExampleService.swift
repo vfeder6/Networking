@@ -12,7 +12,7 @@ protocol ExampleServiceProtocol {
 }
 
 struct ExampleService: ExampleServiceProtocol {
-    let networkService: NetworkService = NetworkService(client: NetworkClient.shared)
+    let networkService: NetworkService = .live(host: .init(string: "https://example.com")!)
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError> {
         await networkService.body(
