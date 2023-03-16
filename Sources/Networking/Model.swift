@@ -18,7 +18,7 @@ public struct HTTPResponse {
     let urlResponse: URLResponse
 }
 
-enum NetworkError: Error {
+public enum NetworkError: Error {
     case badURLResponse
     case mismatchingStatusCodes(expected: Int, actual: Int)
     case notDecodableData

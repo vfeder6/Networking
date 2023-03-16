@@ -7,7 +7,7 @@ public struct NetworkService {
         self.client = client
     }
 
-    func response<Response: Decodable>(
+    public func response<Response: Decodable>(
         from endpoint: String,
         queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
@@ -31,7 +31,7 @@ public struct NetworkService {
         }
     }
 
-    func body<Response: Decodable>(
+    public func body<Response: Decodable>(
         to endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
@@ -61,7 +61,7 @@ public struct NetworkService {
         }
     }
 
-    func emptyBody(
+    public func emptyBody(
         from endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
