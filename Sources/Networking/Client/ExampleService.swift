@@ -16,7 +16,7 @@ struct ExampleService: ExampleServiceProtocol {
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError> {
         await networkService.body(
-            to: "/returnsAModel",
+            from: "/returnsAModel",
             method: .post,
             expect: 201,
             decodeTo: ExampleResponse.self
@@ -53,7 +53,7 @@ struct ExampleService: ExampleServiceProtocol {
 
     func requestWithBody(_ body: ExampleRequest) async -> Result<ExampleResponse, DisplayableError> {
         await networkService.body(
-            to: "requestWithBody",
+            from: "requestWithBody",
             body: body,
             decodeTo: ExampleResponse.self
         ).displayable

@@ -32,7 +32,7 @@ public struct NetworkService {
     }
 
     public func body<Response: Decodable>(
-        to endpoint: String,
+        from endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: (any Encodable)? = nil,
         method: HTTPMethod = .get,
