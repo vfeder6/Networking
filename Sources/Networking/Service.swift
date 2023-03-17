@@ -6,8 +6,6 @@ public protocol Service {
     var networkService: NetworkService { get }
 
     static var live: Self { get }
-    static var preview: Self { get }
-    static var mock: Self { get }
 
     func perform(body: (any Encodable)?, queryItems: [URLQueryItem]) async -> Response
 }
