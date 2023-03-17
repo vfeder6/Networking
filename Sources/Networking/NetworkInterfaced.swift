@@ -14,22 +14,16 @@ extension URLSession: NetworkInterfaced {
 public final class URLSessionMock: NetworkInterfaced {
     private let response: Result<Data, NetworkError>
     private let responseURL: URL
-    private let mimeType: String?
-    private let expectedContentLength: Int
-    private let textEncodingName: String?
+    private let expectedStatusCode: Int
 
     init(
         response: Result<Data, NetworkError>,
         responseURL: URL,
-        mimeType: String?,
-        expectedContentLength: Int,
-        textEncodingName: String?
+        expectedStatusCode: Int
     ) {
         self.response = response
         self.responseURL = responseURL
-        self.mimeType = mimeType
-        self.expectedContentLength = expectedContentLength
-        self.textEncodingName = textEncodingName
+        self.expectedStatusCode = expectedStatusCode
     }
 
     public func send(data: Data?, urlRequest: URLRequest) async throws -> HTTPResponse {
@@ -37,7 +31,7 @@ public final class URLSessionMock: NetworkInterfaced {
         case .success(let responseData):
             return .init(body: responseData, urlResponse: HTTPURLResponse(
                 url: responseURL,
-                statusCode: 200,
+                statusCode: expectedStatusCode,
                 httpVersion: nil,
                 headerFields: nil
             )!)

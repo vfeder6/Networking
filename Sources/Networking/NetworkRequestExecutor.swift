@@ -23,14 +23,12 @@ struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
     private let url: URL
     let networkInterfaced: NetworkInterfaced
 
-    init(response: Result<Data, NetworkError>, responseURL: URL, mimeType: String?, expectedContentLenght: Int, textEncodingName: String?) {
+    init(response: Result<Data, NetworkError>, responseURL: URL, expectedStatusCode: Int) {
         self.url = responseURL
         networkInterfaced = URLSessionMock(
             response: response,
             responseURL: responseURL,
-            mimeType: mimeType,
-            expectedContentLength: expectedContentLenght,
-            textEncodingName: textEncodingName
+            expectedStatusCode: expectedStatusCode
         )
     }
 

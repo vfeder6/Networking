@@ -101,15 +101,16 @@ extension NetworkService {
         .init(client: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
     }
 
-    public static func mock<Response: Codable>(returning result: Result<Response, NetworkError>) throws -> NetworkService {
+    public static func mock<Response: Codable>(
+        returning result: Result<Response, NetworkError>,
+        expecting statusCode: Int
+    ) throws -> NetworkService {
         let url = URL(string: "https://example.com")!
 
         return .init(client: .init(requestExecutor: NetworkRequestExecutorMock(
             response: result.dataSuccess,
             responseURL: url,
-            mimeType: nil,
-            expectedContentLenght: 1,
-            textEncodingName: nil
+            expectedStatusCode: statusCode
         ), host: url, baseHeaders: [:]))
     }
 }
