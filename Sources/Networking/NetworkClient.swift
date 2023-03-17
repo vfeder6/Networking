@@ -1,27 +1,12 @@
 import Foundation
 
-public protocol NetworkClientProtocol {
-    var requestExecutor: NetworkRequestExecutorProtocol { get }
-    var host: URL { get }
-    var baseHeaders: [String: String] { get }
-
-    func performRequest<Response: Decodable>(
-        to endpoint: String,
-        queryItems: [URLQueryItem],
-        body: (any Encodable)?,
-        method: HTTPMethod,
-        additionalHeaders: [String: String],
-        expect statusCode: Int,
-        decode type: Response.Type?
-    ) async throws -> NetworkResponse<Response>
-}
-
-public struct NetworkClient: NetworkClientProtocol {
-    public let requestExecutor: NetworkRequestExecutorProtocol = NetworkRequestExecutor()
+public struct NetworkClient {
+    public let requestExecutor: NetworkRequestExecutorProtocol
     public let host: URL
     public let baseHeaders: [String : String]
 
-    public init(host: URL, baseHeaders: [String : String]) {
+    public init(requestExecutor: NetworkRequestExecutorProtocol, host: URL, baseHeaders: [String : String]) {
+        self.requestExecutor = requestExecutor
         self.host = host
         self.baseHeaders = baseHeaders
     }

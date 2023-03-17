@@ -6,7 +6,7 @@ public protocol NetworkRequestExecutorProtocol {
     func perform(request: HTTPRequest) async throws -> HTTPResponse
 }
 
-final class NetworkRequestExecutor: NetworkRequestExecutorProtocol {
+struct NetworkRequestExecutor: NetworkRequestExecutorProtocol {
     let networkInterfaced: NetworkInterfaced = URLSession.shared
 
     func perform(request: HTTPRequest) async throws -> HTTPResponse {
@@ -16,5 +16,25 @@ final class NetworkRequestExecutor: NetworkRequestExecutorProtocol {
             urlRequest.setValue(header.value, forHTTPHeaderField: header.key)
         }
         return try await networkInterfaced.send(data: request.body, urlRequest: urlRequest)
+    }
+}
+
+struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
+    private let url: URL
+    let networkInterfaced: NetworkInterfaced
+
+    init(response: Result<Data, NetworkError>, responseURL: URL, mimeType: String?, expectedContentLenght: Int, textEncodingName: String?) {
+        self.url = responseURL
+        networkInterfaced = URLSessionMock(
+            response: response,
+            responseURL: responseURL,
+            mimeType: mimeType,
+            expectedContentLength: expectedContentLenght,
+            textEncodingName: textEncodingName
+        )
+    }
+
+    func perform(request: HTTPRequest) async throws -> HTTPResponse {
+        try await networkInterfaced.send(data: request.body, urlRequest: .init(url: url))
     }
 }

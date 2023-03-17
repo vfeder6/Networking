@@ -1,4 +1,4 @@
-struct ExampleRequest: Encodable {
+struct ExampleRequest: Codable {
 
 }
 
@@ -6,7 +6,7 @@ struct ExampleResponse: Decodable, Equatable {
 
 }
 
-enum DisplayableError: Error {
+public enum DisplayableError: Error {
     case server
     case client
     case unexpected

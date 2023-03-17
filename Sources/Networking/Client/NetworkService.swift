@@ -1,9 +1,9 @@
 import Foundation
 
 public struct NetworkService {
-    let client: NetworkClientProtocol
+    let client: NetworkClient
 
-    init(client: NetworkClientProtocol) {
+    init(client: NetworkClient) {
         self.client = client
     }
 
@@ -98,16 +98,41 @@ private extension String {
 
 extension NetworkService {
     public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
-        .init(client: NetworkClient(host: host, baseHeaders: baseHeaders))
+        .init(client: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
     }
 
-    public static var mock: NetworkService {
-        .init(client: NetworkClient(host: .init(string: "https://mock-instance.com")!, baseHeaders: [:]))
+    public static func mock<Response: Codable>(returning result: Result<Response, NetworkError>) throws -> NetworkService {
+        let url = URL(string: "https://example.com")!
+
+        return .init(client: .init(requestExecutor: NetworkRequestExecutorMock(
+            response: result.dataSuccess,
+            responseURL: url,
+            mimeType: nil,
+            expectedContentLenght: 1,
+            textEncodingName: nil
+        ), host: url, baseHeaders: [:]))
     }
+}
+
+enum NetworkMockError: Error {
+    case serviceInitialization
 }
 
 extension NetworkError {
     static func casted(from error: Error) -> Self {
         error as? Self ?? .unknown
+    }
+}
+
+private extension Result where Success: Codable {
+    var dataSuccess: Result<Data, Failure> {
+        switch self {
+        case .success(let encodable):
+            let successData = try! JSONEncoder().encode(encodable)
+            return .success(successData)
+
+        case .failure(let error):
+            return .failure(error)
+        }
     }
 }
