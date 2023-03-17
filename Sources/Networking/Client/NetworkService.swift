@@ -88,7 +88,7 @@ public struct NetworkService {
     }
 }
 
-private struct Empty: Decodable { }
+struct Empty: Codable { }
 
 private extension String {
     var prependingSlashIfNotPresent: Self {
