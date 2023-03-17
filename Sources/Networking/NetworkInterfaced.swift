@@ -35,12 +35,12 @@ public final class URLSessionMock: NetworkInterfaced {
     public func send(data: Data?, urlRequest: URLRequest) async throws -> HTTPResponse {
         switch response {
         case .success(let responseData):
-            return .init(body: responseData, urlResponse: .init(
+            return .init(body: responseData, urlResponse: HTTPURLResponse(
                 url: responseURL,
-                mimeType: mimeType,
-                expectedContentLength: expectedContentLength,
-                textEncodingName: textEncodingName
-            ))
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!)
 
         case .failure(let error):
             throw error
