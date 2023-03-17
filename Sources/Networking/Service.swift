@@ -13,11 +13,11 @@ public protocol Service {
 }
 
 extension Service {
-    static var preview: Self {
+    public static var preview: Self {
         live
     }
 
-    static var mock: Self {
+    public  static var mock: Self {
         live
     }
 }
