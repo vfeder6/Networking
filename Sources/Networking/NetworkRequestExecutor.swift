@@ -22,9 +22,11 @@ struct NetworkRequestExecutor: NetworkRequestExecutorProtocol {
 struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
     private let url: URL
     let networkInterfaced: NetworkInterfaced
+    let sleepDuration: Duration
 
-    init(response: Result<Data, NetworkError>, responseURL: URL, expectedStatusCode: Int) {
+    init(response: Result<Data, NetworkError>, responseURL: URL, expectedStatusCode: Int, respondsAfter sleepDuration: Duration) {
         self.url = responseURL
+        self.sleepDuration = sleepDuration
         networkInterfaced = URLSessionMock(
             response: response,
             responseURL: responseURL,
@@ -33,6 +35,7 @@ struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
     }
 
     func perform(request: HTTPRequest) async throws -> HTTPResponse {
-        try await networkInterfaced.send(data: request.body, urlRequest: .init(url: url))
+        try await Task.sleep(for: sleepDuration)
+        return try await networkInterfaced.send(data: request.body, urlRequest: .init(url: url))
     }
 }
