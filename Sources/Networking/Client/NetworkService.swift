@@ -104,7 +104,7 @@ extension NetworkService {
     public static func mock<Response: Codable>(
         returning result: Result<Response, NetworkError>,
         expecting statusCode: Int,
-        after sleepDuration: Duration
+        after sleepDuration: Duration = .zero
     ) throws -> NetworkService {
         let url = URL(string: "https://example.com")!
 
