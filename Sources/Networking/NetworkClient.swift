@@ -61,7 +61,7 @@ extension NetworkClient {
         guard let decoded = try? JSONDecoder().decode(type, from: response.body) else {
             throw NetworkError.notDecodableData(
                 model: type,
-                json: String(data: response.body, encoding: .utf8)
+                json: response.body.prettyPrintedJSON
             )
         }
         return .init(headers: headers, body: decoded)
@@ -91,5 +91,15 @@ extension Result where Failure == NetworkError {
         case .failure(let failure):
             return .failure(.from(failure))
         }
+    }
+}
+
+extension Data {
+    var prettyPrintedJSON: String? {
+        guard
+            let json = try? JSONSerialization.jsonObject(with: self, options: .mutableContainers),
+            let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+        else { return nil }
+        return String(decoding: jsonData, as: UTF8.self)
     }
 }
