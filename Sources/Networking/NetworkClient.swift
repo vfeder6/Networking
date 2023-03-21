@@ -60,7 +60,7 @@ extension NetworkClient {
         }
         guard let decoded = try? JSONDecoder().decode(type, from: response.body) else {
             throw NetworkError.notDecodableData(
-                model: type as! Decodable,
+                model: type,
                 json: try? JSONDecoder().decode(String.self, from: response.body)
             )
         }

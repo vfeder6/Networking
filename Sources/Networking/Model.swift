@@ -21,7 +21,7 @@ public struct HTTPResponse {
 public enum NetworkError: Error {
     case badURLResponse
     case mismatchingStatusCodes(expected: Int, actual: Int)
-    case notDecodableData(model: Decodable, json: String?)
+    case notDecodableData(model: Decodable.Type, json: String?)
     case notParseableHeaders
     case notEncodableData
     case mismatchingRequestedResponseType
