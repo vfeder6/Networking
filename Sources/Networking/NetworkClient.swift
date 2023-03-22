@@ -1,11 +1,11 @@
 import Foundation
 
-public struct NetworkClient {
-    public let requestExecutor: NetworkRequestExecutorProtocol
+struct NetworkClient {
+    let requestExecutor: NetworkRequestExecutorProtocol
     public let host: URL
     public let baseHeaders: [String : String]
 
-    public init(requestExecutor: NetworkRequestExecutorProtocol, host: URL, baseHeaders: [String : String]) {
+    init(requestExecutor: NetworkRequestExecutorProtocol, host: URL, baseHeaders: [String : String]) {
         self.requestExecutor = requestExecutor
         self.host = host
         self.baseHeaders = baseHeaders
