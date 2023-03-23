@@ -1,6 +1,6 @@
 import Foundation
 
-public struct NetworkService {
+public struct NetworkClient {
     let client: NetworkDataProcessor
 
     init(client: NetworkDataProcessor) {
@@ -96,8 +96,8 @@ private extension String {
     }
 }
 
-extension NetworkService {
-    public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkService {
+extension NetworkClient {
+    public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
         .init(client: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
     }
 
@@ -105,7 +105,7 @@ extension NetworkService {
         returning result: Result<Response, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
-    ) throws -> NetworkService {
+    ) throws -> NetworkClient {
         let url = URL(string: "https://example.com")!
 
         return .init(client: .init(requestExecutor: NetworkRequestExecutorMock(

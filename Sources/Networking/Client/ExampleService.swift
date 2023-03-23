@@ -1,7 +1,7 @@
 import Foundation
 
 protocol ExampleServiceProtocol {
-    var networkService: NetworkService { get }
+    var networkService: NetworkClient { get }
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError>
     func returnsAnEmptyResponse() async -> Result<Void, DisplayableError>
@@ -12,7 +12,7 @@ protocol ExampleServiceProtocol {
 }
 
 struct ExampleService: ExampleServiceProtocol {
-    let networkService: NetworkService = .live(host: .init(string: "https://example.com")!)
+    let networkService: NetworkClient = .live(host: .init(string: "https://example.com")!)
 
     func returnsAModel() async -> Result<ExampleResponse, DisplayableError> {
         await networkService.body(
