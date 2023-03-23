@@ -33,11 +33,11 @@ public struct NetworkClient {
 
     public func response<Response: Decodable>(
         from endpoint: String,
-        with queryItems: [URLQueryItem] = [],
+        queryItems: [URLQueryItem] = [],
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
-        expect statusCode: Int = 200,
+        expectedStatusCode: Int = 200,
         decode type: Response.Type
     ) async -> Result<Response, NetworkError> {
         let result = await fullResponse(
@@ -46,7 +46,7 @@ public struct NetworkClient {
             body: body,
             method: method,
             additionalHeaders: additionalHeaders,
-            expectedStatusCode: statusCode,
+            expectedStatusCode: expectedStatusCode,
             decode: type
         )
 
