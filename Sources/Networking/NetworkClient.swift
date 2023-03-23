@@ -1,29 +1,29 @@
 import Foundation
 
 public struct NetworkClient {
-    let client: NetworkDataProcessor
+    private let dataProcessor: NetworkDataProcessor
 
-    init(client: NetworkDataProcessor) {
-        self.client = client
+    private init(dataProcessor: NetworkDataProcessor) {
+        self.dataProcessor = dataProcessor
     }
 
-    public func response<Response: Decodable>(
+    public func fullResponse<Response: Decodable>(
         from endpoint: String,
         queryItems: [URLQueryItem] = [],
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
-        expect statusCode: Int = 200,
+        expectedStatusCode: Int = 200,
         decode type: Response.Type
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
-            return .success(try await client.performRequest(
+            return .success(try await dataProcessor.performRequest(
                 to: endpoint.prependingSlashIfNotPresent,
                 queryItems: queryItems,
                 body: body,
                 method: method,
                 additionalHeaders: additionalHeaders,
-                expect: statusCode,
+                expect: expectedStatusCode,
                 decode: type
             ))
         } catch {
@@ -31,22 +31,22 @@ public struct NetworkClient {
         }
     }
 
-    public func body<Response: Decodable>(
+    public func response<Response: Decodable>(
         from endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int = 200,
-        decodeTo type: Response.Type
+        decode type: Response.Type
     ) async -> Result<Response, NetworkError> {
-        let result = await response(
+        let result = await fullResponse(
             from: endpoint.prependingSlashIfNotPresent,
             queryItems: queryItems,
             body: body,
             method: method,
             additionalHeaders: additionalHeaders,
-            expect: statusCode,
+            expectedStatusCode: statusCode,
             decode: type
         )
 
@@ -61,21 +61,21 @@ public struct NetworkClient {
         }
     }
 
-    public func emptyBody(
-        from endpoint: String,
+    public func perform(
+        to endpoint: String,
         with queryItems: [URLQueryItem] = [],
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
-        expect statusCode: Int = 200
+        expectedStatusCode: Int = 200
     ) async -> Result<Void, NetworkError> {
-        let result = await response(
+        let result = await fullResponse(
             from: endpoint.prependingSlashIfNotPresent,
             queryItems: queryItems,
             body: body,
             method: method,
             additionalHeaders: additionalHeaders,
-            expect: statusCode,
+            expectedStatusCode: expectedStatusCode,
             decode: Empty.self
         )
 
@@ -98,7 +98,7 @@ private extension String {
 
 extension NetworkClient {
     public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
-        .init(client: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
+        .init(dataProcessor: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
     }
 
     public static func mock<Response: Codable>(
@@ -108,17 +108,13 @@ extension NetworkClient {
     ) throws -> NetworkClient {
         let url = URL(string: "https://example.com")!
 
-        return .init(client: .init(requestExecutor: NetworkRequestExecutorMock(
-            response: result.dataSuccess,
+        return .init(dataProcessor: .init(requestExecutor: NetworkRequestExecutorMock(
+            response: result.successData,
             responseURL: url,
             expectedStatusCode: statusCode,
             respondsAfter: sleepDuration
         ), host: url, baseHeaders: [:]))
     }
-}
-
-enum NetworkMockError: Error {
-    case serviceInitialization
 }
 
 extension NetworkError {
@@ -128,7 +124,7 @@ extension NetworkError {
 }
 
 private extension Result where Success: Codable {
-    var dataSuccess: Result<Data, Failure> {
+    var successData: Result<Data, Failure> {
         switch self {
         case .success(let encodable):
             let successData = try! JSONEncoder().encode(encodable)
