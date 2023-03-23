@@ -1,6 +1,6 @@
 import Foundation
 
-struct NetworkClient {
+struct NetworkDataProcessor {
     let requestExecutor: NetworkRequestExecutorProtocol
     public let host: URL
     public let baseHeaders: [String : String]
@@ -40,7 +40,7 @@ struct NetworkClient {
     }
 }
 
-extension NetworkClient {
+extension NetworkDataProcessor {
     private func process<Response: Decodable>(
         response: HTTPResponse,
         expecting statusCode: Int,

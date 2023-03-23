@@ -1,9 +1,9 @@
 import Foundation
 
 public struct NetworkService {
-    let client: NetworkClient
+    let client: NetworkDataProcessor
 
-    init(client: NetworkClient) {
+    init(client: NetworkDataProcessor) {
         self.client = client
     }
 
