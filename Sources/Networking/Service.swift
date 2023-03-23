@@ -3,7 +3,7 @@ import Foundation
 public protocol Service {
     associatedtype Response
 
-    var networkService: NetworkClient { get }
+    var networkClient: NetworkClient { get }
 
     static var live: Self { get }
 
