@@ -14,7 +14,7 @@ struct NetworkClient {
     public func performRequest<Response: Decodable>(
         to endpoint: String,
         queryItems: [URLQueryItem] = [],
-        body: (any Encodable)?,
+        body: Encodable?,
         method: HTTPMethod,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int,

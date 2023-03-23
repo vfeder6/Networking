@@ -7,7 +7,7 @@ public protocol Service {
 
     static var live: Self { get }
 
-    func perform(body: (any Encodable)?, queryItems: [URLQueryItem]) async -> Response
+    func perform(body: Encodable?, queryItems: [URLQueryItem]) async -> Response
 }
 
 extension Service {

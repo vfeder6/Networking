@@ -21,8 +21,8 @@ struct NetworkRequestExecutor: NetworkRequestExecutorProtocol {
 
 struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
     private let url: URL
+    private let sleepDuration: Duration
     let networkInterfaced: NetworkInterfaced
-    let sleepDuration: Duration
 
     init(response: Result<Data, NetworkError>, responseURL: URL, expectedStatusCode: Int, respondsAfter sleepDuration: Duration) {
         self.url = responseURL

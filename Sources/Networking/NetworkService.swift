@@ -10,7 +10,7 @@ public struct NetworkService {
     public func response<Response: Decodable>(
         from endpoint: String,
         queryItems: [URLQueryItem] = [],
-        body: (any Encodable)? = nil,
+        body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int = 200,
@@ -34,7 +34,7 @@ public struct NetworkService {
     public func body<Response: Decodable>(
         from endpoint: String,
         with queryItems: [URLQueryItem] = [],
-        body: (any Encodable)? = nil,
+        body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int = 200,
@@ -64,7 +64,7 @@ public struct NetworkService {
     public func emptyBody(
         from endpoint: String,
         with queryItems: [URLQueryItem] = [],
-        body: (any Encodable)? = nil,
+        body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
         expect statusCode: Int = 200
