@@ -46,18 +46,18 @@ extension NetworkDataProcessor {
         expecting statusCode: Int,
         responseType type: Response.Type?
     ) throws -> NetworkResponse<Response> {
-        guard let urlResponse = response.urlResponse as? HTTPURLResponse else {
-            throw NetworkError.badURLResponse
-        }
-        guard urlResponse.statusCode == statusCode else {
-            throw NetworkError.mismatchingStatusCodes(expected: statusCode, actual: urlResponse.statusCode)
-        }
-        guard let headers = urlResponse.allHeaderFields as? [String: String] else {
-            throw NetworkError.notParseableHeaders
-        }
-        guard let type = type else {
-            return .init(headers: headers, body: nil)
-        }
+        guard let urlResponse = response.urlResponse as? HTTPURLResponse
+        else { throw NetworkError.badURLResponse }
+
+        guard urlResponse.statusCode == statusCode
+        else { throw NetworkError.mismatchingStatusCodes(expected: statusCode, actual: urlResponse.statusCode) }
+
+        guard let headers = urlResponse.allHeaderFields as? [String: String]
+        else { throw NetworkError.notParseableHeaders }
+
+        guard let type = type
+        else { return .init(headers: headers, body: nil) }
+
         guard let decoded = try? JSONDecoder().decode(type, from: response.body) else {
             throw NetworkError.notDecodableData(
                 model: type,
