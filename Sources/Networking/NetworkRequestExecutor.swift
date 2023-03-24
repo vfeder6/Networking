@@ -1,8 +1,18 @@
 import Foundation
 
+/// An executor of an `HTTPRequest` that manipulates the input data to build a `URLRequest`.
 protocol NetworkRequestExecutorProtocol {
+
+    /// The interface to the network.
     var networkInterfaced: NetworkInterfaced { get }
 
+    /// Sends the given `HTTPRequest` and gives back an `HTTPResponse`.
+    ///
+    /// - Parameter request: The request to be sent
+    ///
+    /// - Returns: The response from `NetworkInterfaced`
+    ///
+    /// - Throws: Every error thrown by the `send(data:urlRequest)` method of `NetworkInterfaced`.
     func perform(request: HTTPRequest) async throws -> HTTPResponse
 }
 
@@ -16,26 +26,5 @@ struct NetworkRequestExecutor: NetworkRequestExecutorProtocol {
             urlRequest.setValue(header.value, forHTTPHeaderField: header.key)
         }
         return try await networkInterfaced.send(data: request.body, urlRequest: urlRequest)
-    }
-}
-
-struct NetworkRequestExecutorMock: NetworkRequestExecutorProtocol {
-    private let url: URL
-    private let sleepDuration: Duration
-    let networkInterfaced: NetworkInterfaced
-
-    init(response: Result<Data, NetworkError>, responseURL: URL, expectedStatusCode: Int, respondsAfter sleepDuration: Duration) {
-        self.url = responseURL
-        self.sleepDuration = sleepDuration
-        networkInterfaced = URLSessionMock(
-            response: response,
-            responseURL: responseURL,
-            expectedStatusCode: expectedStatusCode
-        )
-    }
-
-    func perform(request: HTTPRequest) async throws -> HTTPResponse {
-        try await Task.sleep(for: sleepDuration)
-        return try await networkInterfaced.send(data: request.body, urlRequest: .init(url: url))
     }
 }

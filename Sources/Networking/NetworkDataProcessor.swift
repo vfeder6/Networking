@@ -1,9 +1,9 @@
 import Foundation
 
 struct NetworkDataProcessor {
-    let requestExecutor: NetworkRequestExecutorProtocol
-    let host: URL
-    let baseHeaders: [String : String]
+    private let requestExecutor: NetworkRequestExecutorProtocol
+    private let host: URL
+    private let baseHeaders: [String : String]
 
     init(requestExecutor: NetworkRequestExecutorProtocol, host: URL, baseHeaders: [String : String]) {
         self.requestExecutor = requestExecutor
