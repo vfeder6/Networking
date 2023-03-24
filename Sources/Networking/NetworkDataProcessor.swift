@@ -2,8 +2,8 @@ import Foundation
 
 struct NetworkDataProcessor {
     let requestExecutor: NetworkRequestExecutorProtocol
-    public let host: URL
-    public let baseHeaders: [String : String]
+    let host: URL
+    let baseHeaders: [String : String]
 
     init(requestExecutor: NetworkRequestExecutorProtocol, host: URL, baseHeaders: [String : String]) {
         self.requestExecutor = requestExecutor
@@ -11,7 +11,7 @@ struct NetworkDataProcessor {
         self.baseHeaders = baseHeaders
     }
 
-    public func performRequest<Response: Decodable>(
+    func performRequest<Response: Decodable>(
         to endpoint: String,
         queryItems: [URLQueryItem] = [],
         body: Encodable?,
@@ -80,17 +80,6 @@ extension NetworkDataProcessor {
     func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
         let endpointURL = host.appending(path: endpoint)
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
-    }
-}
-
-extension Result where Failure == NetworkError {
-    var displayable: Result<Success, DisplayableError> {
-        switch self {
-        case .success(let success):
-            return .success(success)
-        case .failure(let failure):
-            return .failure(.from(failure))
-        }
     }
 }
 
