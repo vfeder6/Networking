@@ -18,7 +18,7 @@ public protocol Service {
     /// - Parameter queryItems: The query items to append to the URL.
     ///
     /// - Returns: The response `Decodable` model.
-    func perform(body: Encodable?, queryItems: [URLQueryItem]) async -> Response
+    func perform(body: Encodable?, queryItems: [URLQueryItem]) async -> Result<Response, NetworkError>
 }
 
 extension Service {
