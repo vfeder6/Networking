@@ -2,17 +2,17 @@ import Foundation
 
 /// A client that processes input and output data for network requests.
 public struct NetworkClient<Response: Decodable> {
-    private let requestExecutor: NetworkRequestExecutorProtocol
+    private let networkInterfaced: NetworkInterfaced
     private let host: URL
     private let baseHeaders: [String : String]
 
     /// Initializes an instance with a base URL and base headers.
     ///
-    /// - Parameter requestExecutor: The entity responsible of performing the network request.
+    /// - Parameter networkInterfaced: The entity responsible of performing the network request.
     /// - Parameter baseURL: The starting base URL
     /// - Parameter baseHeaders: The starting base headers
-    init(requestExecutor: NetworkRequestExecutorProtocol, baseURL: URL, baseHeaders: [String : String]) {
-        self.requestExecutor = requestExecutor
+    init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String]) {
+        self.networkInterfaced = networkInterfaced
         self.host = baseURL
         self.baseHeaders = baseHeaders
     }
@@ -49,7 +49,7 @@ extension NetworkClient {
             headers: composeHeaders(additionalHeaders),
             body: try encodeBody(body)
         )
-        let response = try await requestExecutor.perform(request: request)
+        let response = try await networkInterfaced.send(request: request)
         return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }
@@ -235,6 +235,6 @@ extension NetworkClient {
     ///
     /// - Returns: The live instance of `NetworkClient`.
     public static func live(baseURL: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
-        .init(requestExecutor: NetworkRequestExecutor(), baseURL: baseURL, baseHeaders: baseHeaders)
+        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders)
     }
 }

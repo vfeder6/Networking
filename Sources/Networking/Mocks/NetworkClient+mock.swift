@@ -19,7 +19,7 @@ extension NetworkClient {
     ) throws -> NetworkClient {
         let url = URL(string: "https://example.com")!
 
-        return .init(requestExecutor: NetworkRequestExecutorMock(
+        return .init(networkInterfaced: URLSessionMock(
             response: result.successData,
             responseURL: url,
             expectedStatusCode: statusCode,

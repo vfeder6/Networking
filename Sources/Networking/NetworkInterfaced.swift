@@ -1,25 +1,35 @@
 import Foundation
 
-/// Entity providing a raw interface to the network.
+/// Entity providing an interface to the network.
 protocol NetworkInterfaced {
 
-    /// Sends the given `Data` (if not `nil`) for a request.
+    /// Sends the given `HTTPRequest` and gives back a `HTTPResponse`.
     /// The live implementation of this protocol wraps the `upload(for:from:)` method of `URLSession`.
     ///
-    /// - Parameter data: The body data to send
-    /// - Parameter urlRequest: The request to be uploaded.
+    /// - Parameter request: The HTTP request to send
     ///
-    /// - Returns: An `HTTPResponse` entity.
-    ///
-    /// This method is called by `NetworkRequestExecutor` to build a `URLRequest` from a `HTTPRequest`.
+    /// - Returns: A `HTTPResponse` entity
     ///
     /// - Throws: Every error thrown by the `upload(for:from:)` method of `URLSession`.
-    func send(data: Data?, urlRequest: URLRequest) async throws -> HTTPResponse
+    func send(request: HTTPRequest) async throws -> HTTPResponse
 }
 
 extension URLSession: NetworkInterfaced {
-    func send(data: Data?, urlRequest: URLRequest) async throws -> HTTPResponse {
-        let (data, response) = try await upload(for: urlRequest, from: data ?? .init())
-        return .init(body: data, urlResponse: response)
+    func send(request: HTTPRequest) async throws -> HTTPResponse {
+        do {
+            let (data, response) = try await upload(for: request.urlRequest, from: request.body ?? .init())
+            return .init(body: data, urlResponse: response)
+        } catch {
+            throw NetworkError.urlSession(error: error)
+        }
+    }
+}
+
+extension HTTPRequest {
+    fileprivate var urlRequest: URLRequest {
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = method.rawValue
+        headers.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }
+        return urlRequest
     }
 }
