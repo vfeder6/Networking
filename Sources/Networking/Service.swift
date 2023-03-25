@@ -29,16 +29,29 @@ public protocol Service {
 
     /// Live implementation of the service.
     static var live: Self { get }
+}
+
+extension Service {
 
     /// Performs a request to the network, using the provided `NetworkClient`.
     ///
     /// - Returns: The entire response from the server.
-    func perform() async -> Result<NetworkResponse<Response>, NetworkError>
-}
-
-extension Service {
-    public func perform() async -> Result<NetworkResponse<Response>, NetworkError> {
+    public func performAndGetFullResponse() async -> Result<NetworkResponse<Response>, NetworkError> {
         await networkClient.fullResponseResult(
+            from: endpoint,
+            queryItems: queryItems,
+            body: body,
+            method: method,
+            additionalHeaders: additionalHeaders,
+            expectedStatusCode: expectedStatusCode
+        )
+    }
+
+    /// Performs a request to the network, using the provided `NetworkClient`.
+    ///
+    /// - Returns: The `Decodable` entity from the server.
+    public func perform() async -> Result<Response, NetworkError> {
+        await networkClient.responseResult(
             from: endpoint,
             queryItems: queryItems,
             body: body,
