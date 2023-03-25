@@ -32,3 +32,5 @@ public struct NetworkResponse<Body> {
     let headers: [String : String]
     let body: Body?
 }
+
+struct Empty: Codable { }

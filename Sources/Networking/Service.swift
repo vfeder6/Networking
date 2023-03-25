@@ -1,9 +1,9 @@
 import Foundation
 
 public protocol Service {
-    associatedtype Response
+    associatedtype Response: Decodable
 
-    var networkClient: NetworkClient { get }
+    var networkClient: NetworkClient<Response> { get }
 
     static var live: Self { get }
 
