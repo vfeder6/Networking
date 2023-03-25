@@ -6,8 +6,11 @@ public protocol Service {
     /// The response model used to decode the response body.
     associatedtype Response: Decodable
 
-    /// The client that will perform the network requests
+    /// The client that will perform the network requests.
     var networkClient: NetworkClient<Response> { get }
+
+    /// The defualt initializer that stores the injected `NetworkClient` instance.
+    init(networkClient: NetworkClient<Response>)
 
     /// Live implementation of the service.
     static var live: Self { get }
