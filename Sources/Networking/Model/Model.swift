@@ -43,3 +43,11 @@ public struct NetworkResponse<Body> {
     let headers: [String : String]
     let body: Body?
 }
+
+public protocol Request: Encodable { }
+
+public protocol Response: Decodable { }
+
+public protocol DTO: Request & Response { }
+
+public struct EmptyModel: DTO { }

@@ -11,5 +11,3 @@ struct HTTPResponse {
     let body: Data
     let urlResponse: URLResponse
 }
-
-struct Empty: Codable { }

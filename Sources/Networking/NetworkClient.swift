@@ -41,8 +41,7 @@ extension NetworkClient {
         body: Encodable?,
         method: HTTPMethod,
         additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int,
-        decode type: Response.Type?
+        expectedStatusCode: Int
     ) async throws -> NetworkResponse<Response> {
         let request = HTTPRequest(
             url: composeURL(endpoint, queryItems: queryItems),
@@ -51,7 +50,7 @@ extension NetworkClient {
             body: try encodeBody(body)
         )
         let response = try await requestExecutor.perform(request: request)
-        return try process(response: response, expectedStatusCode: expectedStatusCode, responseType: type)
+        return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }
 
@@ -76,8 +75,7 @@ extension NetworkClient {
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int = 200,
-        decode type: Response.Type
+        expectedStatusCode: Int = 200
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
             return .success(try await performRequest(
@@ -86,8 +84,7 @@ extension NetworkClient {
                 body: body,
                 method: method,
                 additionalHeaders: additionalHeaders,
-                expectedStatusCode: expectedStatusCode,
-                decode: type
+                expectedStatusCode: expectedStatusCode
             ))
         } catch {
             return .failure(error as? NetworkError ?? ._unknown)
@@ -111,8 +108,7 @@ extension NetworkClient {
         body: Encodable? = nil,
         method: HTTPMethod = .get,
         additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int = 200,
-        decode type: Response.Type
+        expectedStatusCode: Int = 200
     ) async -> Result<Response, NetworkError> {
         let result = await fullResponseResult(
             from: endpoint.prependingSlashIfNotPresent,
@@ -120,8 +116,7 @@ extension NetworkClient {
             body: body,
             method: method,
             additionalHeaders: additionalHeaders,
-            expectedStatusCode: expectedStatusCode,
-            decode: type
+            expectedStatusCode: expectedStatusCode
         )
 
         switch result {
@@ -160,8 +155,7 @@ extension NetworkClient {
             body: body,
             method: method,
             additionalHeaders: additionalHeaders,
-            expectedStatusCode: expectedStatusCode,
-            decode: Empty.self as! Response.Type
+            expectedStatusCode: expectedStatusCode
         )
 
         switch result {
@@ -211,8 +205,7 @@ extension NetworkClient {
 extension NetworkClient {
     private func process(
         response: HTTPResponse,
-        expectedStatusCode: Int,
-        responseType type: Response.Type?
+        expectedStatusCode: Int
     ) throws -> NetworkResponse<Response> {
         guard let urlResponse = response.urlResponse as? HTTPURLResponse
         else { throw NetworkError.badURLResponse }
@@ -223,12 +216,13 @@ extension NetworkClient {
         guard let headers = urlResponse.allHeaderFields as? [String: String]
         else { throw NetworkError.notParseableHeaders }
 
-        guard let type = type
-        else { return .init(headers: headers, body: nil) }
+        if Response.Type.self == EmptyModel.self {
+            return .init(headers: headers, body: nil)
+        }
 
-        guard let decoded = try? JSONDecoder().decode(type, from: response.body) else {
+        guard let decoded = try? JSONDecoder().decode(Response.self, from: response.body) else {
             throw NetworkError.notDecodableData(
-                model: type,
+                model: Response.self,
                 json: response.body.prettyPrintedJSON
             )
         }
