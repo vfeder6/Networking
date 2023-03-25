@@ -3,7 +3,7 @@ import Foundation
 struct HTTPRequest {
     let url: URL
     let method: HTTPMethod
-    let headers: [String: String]
+    let headers: [String : String]
     let body: Data?
 }
 

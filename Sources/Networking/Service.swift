@@ -4,13 +4,13 @@ import Foundation
 public protocol Service {
 
     /// The response model used to decode the response body.
-    associatedtype Response: Decodable
+    associatedtype R: Response
 
     /// The client that will perform the network requests.
-    var networkClient: NetworkClient<Response> { get }
+    var networkClient: NetworkClient<R> { get }
 
     /// The defualt initializer that stores the injected `NetworkClient` instance.
-    init(networkClient: NetworkClient<Response>)
+    init(networkClient: NetworkClient<R>)
 
     /// Live implementation of the service.
     static var live: Self { get }
