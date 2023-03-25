@@ -40,8 +40,8 @@ public enum NetworkError: Error {
 }
 
 public struct NetworkResponse<Body> {
-    let headers: [String : String]
-    let body: Body?
+    public let headers: [String : String]
+    public let body: Body?
 }
 
 public protocol Request: Encodable { }
