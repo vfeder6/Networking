@@ -23,7 +23,7 @@ public struct NetworkClient {
                 body: body,
                 method: method,
                 additionalHeaders: additionalHeaders,
-                expect: expectedStatusCode,
+                expectedStatusCode: expectedStatusCode,
                 decode: type
             ))
         } catch {
@@ -98,7 +98,7 @@ private extension String {
 
 extension NetworkClient {
     public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
-        .init(dataProcessor: .init(requestExecutor: NetworkRequestExecutor(), host: host, baseHeaders: baseHeaders))
+        .init(dataProcessor: .init(requestExecutor: NetworkRequestExecutor(), baseURL: host, baseHeaders: baseHeaders))
     }
 
     public static func mock<Response: Codable>(
@@ -113,7 +113,7 @@ extension NetworkClient {
             responseURL: url,
             expectedStatusCode: statusCode,
             respondsAfter: sleepDuration
-        ), host: url, baseHeaders: [:]))
+        ), baseURL: url, baseHeaders: [:]))
     }
 }
 
