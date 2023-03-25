@@ -79,7 +79,7 @@ extension NetworkClient {
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
             return .success(try await performRequest(
-                to: endpoint.prependingSlashIfNotPresent,
+                to: endpoint,
                 queryItems: queryItems,
                 body: body,
                 method: method,
@@ -111,7 +111,7 @@ extension NetworkClient {
         expectedStatusCode: Int
     ) async -> Result<Response, NetworkError> {
         let result = await fullResponseResult(
-            from: endpoint.prependingSlashIfNotPresent,
+            from: endpoint,
             queryItems: queryItems,
             body: body,
             method: method,
@@ -150,7 +150,7 @@ extension NetworkClient {
         expectedStatusCode: Int
     ) async -> Result<Void, NetworkError> {
         let result = await fullResponseResult(
-            from: endpoint.prependingSlashIfNotPresent,
+            from: endpoint,
             queryItems: queryItems,
             body: body,
             method: method,
@@ -164,12 +164,6 @@ extension NetworkClient {
         case .failure(let networkError):
             return .failure(networkError)
         }
-    }
-}
-
-private extension String {
-    var prependingSlashIfNotPresent: Self {
-        starts(with: "/") ? self : "/\(self)"
     }
 }
 
