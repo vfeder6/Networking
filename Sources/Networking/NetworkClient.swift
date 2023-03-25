@@ -131,7 +131,7 @@ extension NetworkClient {
     }
 
     /// Performs a network request, safely returning the error if present.
-    /// The body decoding is ignored.
+    /// The body decoding is ignored only if `Response` is of type `EmptyModel`.
     ///
     /// - Parameter endpoint: The endpoint to append to `baseURL`
     /// - Parameter queryItems: The query items to append at the end of the URL
