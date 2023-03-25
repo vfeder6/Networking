@@ -1,10 +1,17 @@
 import Foundation
 
 extension NetworkClient {
-    public static func live(host: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
-        .init(requestExecutor: NetworkRequestExecutor(), baseURL: host, baseHeaders: baseHeaders)
-    }
 
+    /// Creates a mocked instance of NetworkClient.
+    ///
+    /// - Parameter result: The desired response
+    /// - Parameter statusCode: The desired status code
+    /// - Parameter sleepDuration: The amount of time the current Task has to sleep before returning the mocked data,
+    /// simulating a delay from the server
+    ///
+    /// - Returns: The mocked NetworkClient instance.
+    ///
+    /// - Throws: The error passed in `result`, if it's `.failure`.
     public static func mock<Response: Codable>(
         returning result: Result<Response, NetworkError>,
         expecting statusCode: Int,

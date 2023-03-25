@@ -12,7 +12,7 @@ protocol NetworkRequestExecutorProtocol {
     ///
     /// - Returns: The response from `NetworkInterfaced`
     ///
-    /// - Throws: Every error thrown by the `send(data:urlRequest)` method of `NetworkInterfaced`.
+    /// - Throws: Every `Error` thrown by `URLSession` wrapped into a `NetworkError`.
     func perform(request: HTTPRequest) async throws -> HTTPResponse
 }
 
@@ -25,6 +25,11 @@ struct NetworkRequestExecutor: NetworkRequestExecutorProtocol {
         request.headers.forEach { header in
             urlRequest.setValue(header.value, forHTTPHeaderField: header.key)
         }
-        return try await networkInterfaced.send(data: request.body, urlRequest: urlRequest)
+
+        do {
+            return try await networkInterfaced.send(data: request.body, urlRequest: urlRequest)
+        } catch {
+            throw NetworkError.urlSession(error: error)
+        }
     }
 }

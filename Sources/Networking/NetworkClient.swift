@@ -34,7 +34,7 @@ extension NetworkClient {
     ///
     /// - Returns: A `NetworkResponse` entity.
     ///
-    /// - Throws: A `NetworkError` case.
+    /// - Throws: A `NetworkError`.
     public func performRequest(
         to endpoint: String,
         queryItems: [URLQueryItem] = [],
@@ -44,20 +44,11 @@ extension NetworkClient {
         expectedStatusCode: Int,
         decode type: Response.Type?
     ) async throws -> NetworkResponse<Response> {
-        var bodyData: Data?
-
-        if let body {
-            guard let data = try? JSONEncoder().encode(body) else {
-                throw NetworkError.notEncodableData
-            }
-            bodyData = data
-        }
-
         let request = HTTPRequest(
             url: composeURL(endpoint, queryItems: queryItems),
             method: method,
             headers: composeHeaders(additionalHeaders),
-            body: bodyData
+            body: try encodeBody(body)
         )
         let response = try await requestExecutor.perform(request: request)
         return try process(response: response, expectedStatusCode: expectedStatusCode, responseType: type)
@@ -99,7 +90,7 @@ extension NetworkClient {
                 decode: type
             ))
         } catch {
-            return .failure(error as? NetworkError ?? .unknown)
+            return .failure(error as? NetworkError ?? ._unknown)
         }
     }
 
@@ -188,7 +179,34 @@ private extension String {
     }
 }
 
-// MARK: - Data processing
+// MARK: - Request data processing
+
+extension NetworkClient {
+    private func composeHeaders(_ additionalHeaders: [String: String]?) -> [String: String] {
+        var allHeaders = baseHeaders
+        additionalHeaders.map { headers in
+            headers.forEach { header in
+                allHeaders[header.key] = header.value
+            }
+        }
+        return allHeaders
+    }
+
+    private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
+        let endpointURL = host.appending(path: endpoint)
+        return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+    }
+
+    private func encodeBody(_ encodable: Encodable?) throws -> Data? {
+        try encodable.map { body in
+            guard let data = try? JSONEncoder().encode(body)
+            else { throw NetworkError.notEncodableData }
+            return data
+        }
+    }
+}
+
+// MARK: - Response data processing
 
 extension NetworkClient {
     private func process(
@@ -216,19 +234,19 @@ extension NetworkClient {
         }
         return .init(headers: headers, body: decoded)
     }
+}
 
-    func composeHeaders(_ additionalHeaders: [String: String]?) -> [String: String] {
-        var allHeaders = baseHeaders
-        additionalHeaders.map { headers in
-            headers.forEach { header in
-                allHeaders[header.key] = header.value
-            }
-        }
-        return allHeaders
-    }
+// MARK: - Instance
 
-    func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        let endpointURL = host.appending(path: endpoint)
-        return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+extension NetworkClient {
+
+    /// Creates a live instance of `NetworkClient`.
+    ///
+    /// - Parameter baseURL: The base URL
+    /// - Parameter baseHeaders: The base headers
+    ///
+    /// - Returns: The live instance of `NetworkClient`.
+    public static func live(baseURL: URL, baseHeaders: [String: String] = [:]) -> NetworkClient {
+        .init(requestExecutor: NetworkRequestExecutor(), baseURL: baseURL, baseHeaders: baseHeaders)
     }
 }
