@@ -71,11 +71,11 @@ extension NetworkClient {
     /// - Returns: A `Result` containing a `NetworkResponse` entity or `NetworkError`.
     public func fullResponseResult(
         from endpoint: String,
-        queryItems: [URLQueryItem] = [],
-        body: Encodable? = nil,
-        method: HTTPMethod = .get,
-        additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int = 200
+        queryItems: [URLQueryItem],
+        body: Encodable?,
+        method: HTTPMethod,
+        additionalHeaders: [String : String],
+        expectedStatusCode: Int
     ) async -> Result<NetworkResponse<Response>, NetworkError> {
         do {
             return .success(try await performRequest(
@@ -104,11 +104,11 @@ extension NetworkClient {
     /// - Returns: A `Result` containing the `Response` entity or `NetworkError`.
     public func responseResult(
         from endpoint: String,
-        queryItems: [URLQueryItem] = [],
-        body: Encodable? = nil,
-        method: HTTPMethod = .get,
-        additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int = 200
+        queryItems: [URLQueryItem],
+        body: Encodable?,
+        method: HTTPMethod,
+        additionalHeaders: [String : String],
+        expectedStatusCode: Int
     ) async -> Result<Response, NetworkError> {
         let result = await fullResponseResult(
             from: endpoint.prependingSlashIfNotPresent,
@@ -143,11 +143,11 @@ extension NetworkClient {
     /// - Returns: A `Result` containing `Void` or `NetworkError`.
     public func result(
         to endpoint: String,
-        with queryItems: [URLQueryItem] = [],
-        body: Encodable? = nil,
-        method: HTTPMethod = .get,
-        additionalHeaders: [String: String] = [:],
-        expectedStatusCode: Int = 200
+        with queryItems: [URLQueryItem],
+        body: Encodable?,
+        method: HTTPMethod,
+        additionalHeaders: [String : String],
+        expectedStatusCode: Int
     ) async -> Result<Void, NetworkError> {
         let result = await fullResponseResult(
             from: endpoint.prependingSlashIfNotPresent,
