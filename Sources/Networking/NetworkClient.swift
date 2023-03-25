@@ -37,10 +37,10 @@ extension NetworkClient {
     /// - Throws: A `NetworkError`.
     public func performRequest(
         to endpoint: String,
-        queryItems: [URLQueryItem] = [],
+        queryItems: [URLQueryItem],
         body: Encodable?,
         method: HTTPMethod,
-        additionalHeaders: [String: String] = [:],
+        additionalHeaders: [String : String],
         expectedStatusCode: Int
     ) async throws -> NetworkResponse<Response> {
         let request = HTTPRequest(
