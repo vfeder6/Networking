@@ -6,18 +6,6 @@ public enum HTTPMethod: String {
     case patch = "PATCH"
 }
 
-public struct HTTPRequest {
-    let url: URL
-    let method: HTTPMethod
-    let headers: [String: String]
-    let body: Data?
-}
-
-public struct HTTPResponse {
-    let body: Data
-    let urlResponse: URLResponse
-}
-
 public enum NetworkError: Error {
     case badURLResponse
     case mismatchingStatusCodes(expected: Int, actual: Int)
@@ -32,5 +20,3 @@ public struct NetworkResponse<Body> {
     let headers: [String : String]
     let body: Body?
 }
-
-struct Empty: Codable { }
