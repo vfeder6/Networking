@@ -16,6 +16,11 @@ public struct NetworkClient<Response: Decodable> {
         self.host = baseURL
         self.baseHeaders = baseHeaders
     }
+}
+
+// MARK: - Public API, main method
+
+extension NetworkClient {
 
     /// Performs a network request.
     ///
@@ -57,7 +62,23 @@ public struct NetworkClient<Response: Decodable> {
         let response = try await requestExecutor.perform(request: request)
         return try process(response: response, expectedStatusCode: expectedStatusCode, responseType: type)
     }
+}
 
+// MARK: - Public API, auxiliary methods
+
+extension NetworkClient {
+
+    /// Performs a network request, safely returning the full response from the server.
+    ///
+    /// - Parameter endpoint: The endpoint to append to `baseURL`
+    /// - Parameter queryItems: The query items to append at the end of the URL
+    /// - Parameter body: The `Encodable` entity used to generate a JSON body
+    /// - Parameter method: The HTTP method to use
+    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
+    /// - Parameter expectedStatusCode: The expected response status code
+    /// - Parameter type: The `Decodable` type expected in the response body
+    ///
+    /// - Returns: A `Result` containing a `NetworkResponse` entity or `NetworkError`.
     public func fullResponseResult(
         from endpoint: String,
         queryItems: [URLQueryItem] = [],
@@ -78,10 +99,21 @@ public struct NetworkClient<Response: Decodable> {
                 decode: type
             ))
         } catch {
-            return .failure(.casted(from: error))
+            return .failure(error as? NetworkError ?? .unknown)
         }
     }
 
+    /// Performs a network request, safely returning the response body from the server.
+    ///
+    /// - Parameter endpoint: The endpoint to append to `baseURL`
+    /// - Parameter queryItems: The query items to append at the end of the URL
+    /// - Parameter body: The `Encodable` entity used to generate a JSON body
+    /// - Parameter method: The HTTP method to use
+    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
+    /// - Parameter expectedStatusCode: The expected response status code
+    /// - Parameter type: The `Decodable` type expected in the response body
+    ///
+    /// - Returns: A `Result` containing the `Response` entity or `NetworkError`.
     public func responseResult(
         from endpoint: String,
         queryItems: [URLQueryItem] = [],
@@ -112,6 +144,17 @@ public struct NetworkClient<Response: Decodable> {
         }
     }
 
+    /// Performs a network request, safely returning the error if present.
+    /// The body decoding is ignored.
+    ///
+    /// - Parameter endpoint: The endpoint to append to `baseURL`
+    /// - Parameter queryItems: The query items to append at the end of the URL
+    /// - Parameter body: The `Encodable` entity used to generate a JSON body
+    /// - Parameter method: The HTTP method to use
+    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
+    /// - Parameter expectedStatusCode: The expected response status code
+    ///
+    /// - Returns: A `Result` containing `Void` or `NetworkError`.
     public func result(
         to endpoint: String,
         with queryItems: [URLQueryItem] = [],
@@ -144,6 +187,8 @@ private extension String {
         starts(with: "/") ? self : "/\(self)"
     }
 }
+
+// MARK: - Data processing
 
 extension NetworkClient {
     private func process(
@@ -185,11 +230,5 @@ extension NetworkClient {
     func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
         let endpointURL = host.appending(path: endpoint)
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
-    }
-}
-
-extension NetworkError {
-    static func casted(from error: Error) -> Self {
-        error as? Self ?? .unknown
     }
 }
