@@ -6,26 +6,54 @@ public protocol Service {
     /// The response model used to decode the response body.
     associatedtype Response: Decodable
 
-    /// The client that will perform the network requests.
+    /// The client that will perform the network requests
     var networkClient: NetworkClient<Response> { get }
+
+    /// The encodable model to pass as the request's body
+    var endpoint: String { get }
+
+    /// The query items to append to the URL
+    var queryItems: [URLQueryItem] { get }
+
+    /// The body to use
+    var body: Encodable? { get }
+
+    /// The method used to perform the network call
+    var method: HTTPMethod { get }
+
+    /// Any necessary additional header
+    var additionalHeaders: [String : String] { get }
+
+    /// The expected status code from the server
+    var expectedStatusCode: Int { get }
 
     /// Live implementation of the service.
     static var live: Self { get }
 
     /// Performs a request to the network, using the provided `NetworkClient`.
     ///
-    /// - Parameter body: The encodable model to pass as the request's body.
-    /// - Parameter queryItems: The query items to append to the URL.
-    ///
-    /// - Returns: The response `Decodable` model.
-    func perform(body: Encodable?, queryItems: [URLQueryItem]) async -> Result<Response, NetworkError>
+    /// - Returns: The entire response from the server.
+    func perform() async -> Result<NetworkResponse<Response>, NetworkError>
+}
+
+extension Service {
+    func perform() async -> Result<NetworkResponse<Response>, NetworkError> {
+        await networkClient.fullResponseResult(
+            from: endpoint,
+            queryItems: queryItems,
+            body: body,
+            method: method,
+            additionalHeaders: additionalHeaders,
+            expectedStatusCode: expectedStatusCode
+        )
+    }
 }
 
 extension Service {
 
-    /// Useful implementation to use with SwiftUI previews.
+    /// Implementation to use with SwiftUI previews.
     ///
-    /// This implementation default to the mocked one.
+    /// This implementation defaults to the mocked one.
     public static var preview: Self {
         mock
     }
