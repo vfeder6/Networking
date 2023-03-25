@@ -37,7 +37,7 @@ public protocol Service {
 }
 
 extension Service {
-    func perform() async -> Result<NetworkResponse<Response>, NetworkError> {
+    public func perform() async -> Result<NetworkResponse<Response>, NetworkError> {
         await networkClient.fullResponseResult(
             from: endpoint,
             queryItems: queryItems,
