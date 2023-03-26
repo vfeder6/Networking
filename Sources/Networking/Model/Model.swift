@@ -15,7 +15,7 @@ public enum NetworkError: Error {
     case mismatchingStatusCodes(expected: Int, actual: Int)
 
     /// Data received in the response body is not decodable
-    case notDecodableData(model: Decodable.Type, json: String?)
+    case notDecodableData(model: Response.Type, json: String?)
 
     /// Headers were not parseable in the response
     case notParseableHeaders
@@ -40,6 +40,19 @@ public enum NetworkError: Error {
 }
 
 public struct NetworkResponse<Body> {
-    let headers: [String : String]
-    let body: Body?
+    public let headers: [String : String]
+    public let body: Body?
 }
+
+/// A convenience `protocol` for `Encodable` entities used for network requests
+public protocol Request: Encodable { }
+
+/// A convenience `protocol` for `Decodable` entities used for network responses
+public protocol Response: Decodable { }
+
+/// A convenience `protocol` for Data Transfer Objects (both `Encodable` and `Decodable`) used both for network
+/// requests and responses
+public protocol DTO: Request & Response { }
+
+/// An empty `DTO`, used to ignore the body decoding
+public struct EmptyDTO: DTO { }

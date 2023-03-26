@@ -12,14 +12,14 @@ extension NetworkClient {
     /// - Returns: The mocked NetworkClient instance.
     ///
     /// - Throws: The error passed in `result`, if it's `.failure`.
-    public static func mock<Response: Codable>(
+    public static func mock<Response: DTO>(
         returning result: Result<Response, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
-    ) throws -> NetworkClient {
+    ) throws -> Self {
         let url = URL(string: "https://example.com")!
 
-        return .init(requestExecutor: NetworkRequestExecutorMock(
+        return .init(networkInterfaced: URLSessionMock(
             response: result.successData,
             responseURL: url,
             expectedStatusCode: statusCode,
@@ -28,7 +28,7 @@ extension NetworkClient {
     }
 }
 
-private extension Result where Success: Codable {
+private extension Result where Success: DTO {
     var successData: Result<Data, Failure> {
         switch self {
         case .success(let encodable):
