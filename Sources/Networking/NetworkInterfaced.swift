@@ -20,7 +20,7 @@ extension URLSession: NetworkInterfaced {
             let (data, response) = try await upload(for: request.urlRequest, from: request.body ?? .init())
             return .init(body: data, urlResponse: response)
         } catch {
-            throw NetworkError.urlSession(error: error)
+            throw NetworkError.urlSession(description: error.localizedDescription)
         }
     }
 }

@@ -15,7 +15,7 @@ public enum NetworkError: Error {
     case mismatchingStatusCodes(expected: Int, actual: Int)
 
     /// Data received in the response body is not decodable
-    case notDecodableData(model: Response.Type, json: String?)
+    case notDecodableData(model: any Response.Type, json: String?)
 
     /// Headers were not parseable in the response
     case notParseableHeaders
@@ -27,7 +27,7 @@ public enum NetworkError: Error {
     case mismatchingRequestedResponseType
 
     /// Error thrown by `URLSession`
-    case urlSession(error: Error)
+    case urlSession(description: String)
 
     /// ⚠️ Error that should not be returned to the client ⚠️
     ///
@@ -39,16 +39,41 @@ public enum NetworkError: Error {
     case _unknown
 }
 
-public struct NetworkResponse<Body> {
+extension NetworkError: Equatable {
+    public static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
+        switch (lhs, rhs) {
+        case (.badURLResponse, .badURLResponse),
+            (.notParseableHeaders, .notParseableHeaders),
+            (.notEncodableData, .notEncodableData),
+            (.mismatchingRequestedResponseType, .mismatchingRequestedResponseType),
+            (._unknown, ._unknown):
+            return true
+
+        case let (.mismatchingStatusCodes(lhsExpected, lhsActual), .mismatchingStatusCodes(rhsExpected, rhsActual)):
+            return lhsExpected == rhsExpected && lhsActual == rhsActual
+
+        case let (.notDecodableData(lhsModel, lhsJSON), .notDecodableData(rhsModel, rhsJSON)):
+            return lhsModel == rhsModel && lhsJSON == rhsJSON
+
+        case let (.urlSession(lhsDescription), .urlSession(rhsDescription)):
+            return lhsDescription == rhsDescription
+
+        default:
+            return false
+        }
+    }
+}
+
+public struct NetworkResponse<Body: Equatable>: Equatable {
     public let headers: [String : String]
     public let body: Body?
 }
 
 /// A convenience `protocol` for `Encodable` entities used for network requests
-public protocol Request: Encodable { }
+public protocol Request: Encodable, Equatable { }
 
 /// A convenience `protocol` for `Decodable` entities used for network responses
-public protocol Response: Decodable { }
+public protocol Response: Decodable, Equatable { }
 
 /// A convenience `protocol` for Data Transfer Objects (both `Encodable` and `Decodable`) used both for network
 /// requests and responses

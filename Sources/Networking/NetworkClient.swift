@@ -38,7 +38,7 @@ extension NetworkClient {
     public func performRequest(
         to endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -72,7 +72,7 @@ extension NetworkClient {
     public func fullResponseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -105,7 +105,7 @@ extension NetworkClient {
     public func responseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -144,7 +144,7 @@ extension NetworkClient {
     public func result(
         to endpoint: String,
         with queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -185,7 +185,7 @@ extension NetworkClient {
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
 
-    private func encodeBody(_ request: Request?) throws -> Data? {
+    private func encodeBody(_ request: (any Request)?) throws -> Data? {
         try request.map { body in
             guard let data = try? JSONEncoder().encode(body)
             else { throw NetworkError.notEncodableData }
