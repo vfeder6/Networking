@@ -11,14 +11,16 @@ func raiseRuntimeWarning(_ message: StaticString) {
         &info
     )
 
-    os_log(
-        .fault,
-        dso: info.dli_fbase,
-        log: OSLog(
-            subsystem: "com.apple.runtime-issues",
-            category: "Networking"
-        ),
-        message
-    )
+    if let dli_fbase = info.dli_fbase {
+        os_log(
+            .fault,
+            dso: dli_fbase,
+            log: OSLog(
+                subsystem: "com.apple.runtime-issues",
+                category: "Networking"
+            ),
+            message
+        )
+    }
     #endif
 }

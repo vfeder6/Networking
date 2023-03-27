@@ -4,10 +4,48 @@ import XCTest
 final class NetworkClientTests: XCTestCase {
     private var uut: NetworkClient<EmptyModel>!
 
-    func testSuccess() async throws {
+    func test_urlComposition() async {
         initialize()
 
-        let response = await self.uut.fullResponseResult(
+        let response = await uut.fullResponseResult(
+            from: "endpoint",
+            queryItems: [.init(name: "testKey", value: "testValue")],
+            body: nil,
+            method: .get,
+            additionalHeaders: [:],
+            expectedStatusCode: 200
+        )
+
+        XCTAssertEqual(response, .success(.init(
+            headers: [:],
+            body: model,
+            url: .init(string: "https://example.com/endpoint?testKey=testValue")!
+        )))
+    }
+
+    func test_urlComposition_urlAlreadyWithQueryItem() async {
+        initialize()
+
+        let response = await uut.fullResponseResult(
+            from: "endpoint?first=second",
+            queryItems: [.init(name: "testKey", value: "testValue")],
+            body: nil,
+            method: .get,
+            additionalHeaders: [:],
+            expectedStatusCode: 200
+        )
+
+        XCTAssertEqual(response, .success(.init(
+            headers: [:],
+            body: model,
+            url: .init(string: "https://example.com/endpoint%3Ffirst=second?testKey=testValue")!
+        )))
+    }
+
+    func testSuccess() async {
+        initialize()
+
+        let response = await uut.fullResponseResult(
             from: "",
             queryItems: [],
             body: nil,
@@ -19,10 +57,10 @@ final class NetworkClientTests: XCTestCase {
         XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
     }
 
-    func testFailure() async throws {
+    func test_failure_mismatchingStatusCodes() async {
         initialize()
 
-        let response = await self.uut.fullResponseResult(
+        let response = await uut.fullResponseResult(
             from: "",
             queryItems: [],
             body: nil,

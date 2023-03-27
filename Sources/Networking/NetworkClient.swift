@@ -189,7 +189,24 @@ extension NetworkClient {
     }
 
     private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        let endpointURL = endpoint == "" ? host : host.appending(path: endpoint)
+        let endpointURL: URL
+
+        if endpoint == "" {
+            endpointURL = host
+        } else {
+            if endpoint.contains("?") {
+                raiseRuntimeWarning(
+                    """
+                    You are possibly passing an endpoint with already a query item.
+                    The endpoint will be url encoded and characters like `?` will be encoded as well, possibly resulting
+                    in a bad URL.
+                    Please, use the `queryItems` parameter in each method available in `NetworkClient` add query items at
+                    the end of the URL.
+                    """
+                )
+            }
+            endpointURL = host.appending(path: endpoint)
+        }
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
 
