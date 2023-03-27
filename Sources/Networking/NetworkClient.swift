@@ -132,12 +132,6 @@ extension NetworkClient {
             guard let body = response.body else {
                 return .failure(.mismatchingRequestedResponseType)
             }
-            raiseRuntimeWarning(
-                """
-                Error returned from the server is not a `NetworkError`.
-                Please, raise an issue here: https://github.com/vfeder6/Networking/issues
-                containing all the possible needed information to reproduce this bug.
-                """)
             return .success(body)
         case .failure(let networkError):
             return .failure(networkError)
