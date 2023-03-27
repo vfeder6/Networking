@@ -17,14 +17,11 @@ extension NetworkClient {
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
     ) throws -> Self {
-        let url = URL(string: "https://example.com")!
-
-        return .init(networkInterfaced: URLSessionMock(
+        .init(networkInterfaced: URLSessionMock(
             response: result.successData,
-            responseURL: url,
             expectedStatusCode: statusCode,
             respondsAfter: sleepDuration
-        ), baseURL: url, baseHeaders: [:])
+        ), baseURL: .init(string: "https://example.com")!, baseHeaders: [:])
     }
 }
 

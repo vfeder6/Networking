@@ -5,16 +5,7 @@ final class NetworkClientTests: XCTestCase {
     private var uut: NetworkClient<EmptyModel>!
 
     func testSuccess() async throws {
-        uut = .init(
-            networkInterfaced: URLSessionMock(
-                response: .success(encodedModel),
-                responseURL: url,
-                expectedStatusCode: statusCode,
-                respondsAfter: delay
-            ),
-            baseURL: url,
-            baseHeaders: baseHeaders
-        )
+        initialize()
 
         let response = await self.uut.fullResponseResult(
             from: "",
@@ -25,20 +16,11 @@ final class NetworkClientTests: XCTestCase {
             expectedStatusCode: 200
         )
 
-        XCTAssertEqual(response, .success(.init(headers: [:], body: model)))
+        XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
     }
 
     func testFailure() async throws {
-        uut = .init(
-            networkInterfaced: URLSessionMock(
-                response: .success(encodedModel),
-                responseURL: url,
-                expectedStatusCode: statusCode,
-                respondsAfter: delay
-            ),
-            baseURL: url,
-            baseHeaders: baseHeaders
-        )
+        initialize()
 
         let response = await self.uut.fullResponseResult(
             from: "",
@@ -50,6 +32,18 @@ final class NetworkClientTests: XCTestCase {
         )
 
         XCTAssertEqual(response, .failure(.mismatchingStatusCodes(expected: 201, actual: 200)))
+    }
+
+    private func initialize() {
+        uut = .init(
+            networkInterfaced: URLSessionMock(
+                response: .success(encodedModel),
+                expectedStatusCode: statusCode,
+                respondsAfter: delay
+            ),
+            baseURL: url,
+            baseHeaders: baseHeaders
+        )
     }
 }
 

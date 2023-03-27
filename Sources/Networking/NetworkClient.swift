@@ -86,8 +86,16 @@ extension NetworkClient {
                 additionalHeaders: additionalHeaders,
                 expectedStatusCode: expectedStatusCode
             ))
+        } catch let error as NetworkError {
+            return .failure(error)
         } catch {
-            return .failure(error as? NetworkError ?? ._unknown)
+            raiseRuntimeWarning(
+                """
+                Error returned from the server is not a `NetworkError`.
+                Please, raise an issue here: https://github.com/vfeder6/Networking/issues
+                containing all the possible needed information to reproduce this bug.
+                """)
+            return .failure(._unknown)
         }
     }
 
@@ -124,6 +132,12 @@ extension NetworkClient {
             guard let body = response.body else {
                 return .failure(.mismatchingRequestedResponseType)
             }
+            raiseRuntimeWarning(
+                """
+                Error returned from the server is not a `NetworkError`.
+                Please, raise an issue here: https://github.com/vfeder6/Networking/issues
+                containing all the possible needed information to reproduce this bug.
+                """)
             return .success(body)
         case .failure(let networkError):
             return .failure(networkError)
@@ -181,7 +195,7 @@ extension NetworkClient {
     }
 
     private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        let endpointURL = host.appending(path: endpoint)
+        let endpointURL = endpoint == "" ? host : host.appending(path: endpoint)
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
 
@@ -211,7 +225,7 @@ extension NetworkClient {
         else { throw NetworkError.notParseableHeaders }
 
         if R.Type.self == EmptyDTO.self {
-            return .init(headers: headers, body: nil)
+            return .init(headers: headers, body: nil, url: urlResponse.url)
         }
 
         guard let decoded = try? JSONDecoder().decode(R.self, from: response.body) else {
@@ -220,7 +234,7 @@ extension NetworkClient {
                 json: response.body.prettyPrintedJSON
             )
         }
-        return .init(headers: headers, body: decoded)
+        return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
 }
 

@@ -67,6 +67,7 @@ extension NetworkError: Equatable {
 public struct NetworkResponse<Body: Equatable>: Equatable {
     public let headers: [String : String]
     public let body: Body?
+    let url: URL?
 }
 
 /// A convenience `protocol` for `Encodable` entities used for network requests
