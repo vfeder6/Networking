@@ -38,7 +38,7 @@ extension NetworkClient {
     public func performRequest(
         to endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -72,7 +72,7 @@ extension NetworkClient {
     public func fullResponseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -86,8 +86,16 @@ extension NetworkClient {
                 additionalHeaders: additionalHeaders,
                 expectedStatusCode: expectedStatusCode
             ))
+        } catch let error as NetworkError {
+            return .failure(error)
         } catch {
-            return .failure(error as? NetworkError ?? ._unknown)
+            raiseRuntimeWarning(
+                """
+                Error returned from the server is not a `NetworkError`.
+                Please, raise an issue here: https://github.com/vfeder6/Networking/issues
+                containing all the possible needed information to reproduce this bug.
+                """)
+            return .failure(._unknown)
         }
     }
 
@@ -105,7 +113,7 @@ extension NetworkClient {
     public func responseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -144,7 +152,7 @@ extension NetworkClient {
     public func result(
         to endpoint: String,
         with queryItems: [URLQueryItem],
-        body: Request?,
+        body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
@@ -181,11 +189,28 @@ extension NetworkClient {
     }
 
     private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        let endpointURL = host.appending(path: endpoint)
+        let endpointURL: URL
+
+        if endpoint == "" {
+            endpointURL = host
+        } else {
+            if endpoint.contains("?") {
+                raiseRuntimeWarning(
+                    """
+                    Are you passing an endpoint with already a query item?
+                    The endpoint will be url encoded and characters like `?` will be encoded as well, possibly resulting
+                    in a bad URL.
+                    Please, use the `queryItems` parameter in each method available in `NetworkClient` to add query items at
+                    the end of the URL.
+                    """
+                )
+            }
+            endpointURL = host.appending(path: endpoint)
+        }
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
 
-    private func encodeBody(_ request: Request?) throws -> Data? {
+    private func encodeBody(_ request: (any Request)?) throws -> Data? {
         try request.map { body in
             guard let data = try? JSONEncoder().encode(body)
             else { throw NetworkError.notEncodableData }
@@ -211,7 +236,7 @@ extension NetworkClient {
         else { throw NetworkError.notParseableHeaders }
 
         if R.Type.self == EmptyDTO.self {
-            return .init(headers: headers, body: nil)
+            return .init(headers: headers, body: nil, url: urlResponse.url)
         }
 
         guard let decoded = try? JSONDecoder().decode(R.self, from: response.body) else {
@@ -220,7 +245,7 @@ extension NetworkClient {
                 json: response.body.prettyPrintedJSON
             )
         }
-        return .init(headers: headers, body: decoded)
+        return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
 }
 
