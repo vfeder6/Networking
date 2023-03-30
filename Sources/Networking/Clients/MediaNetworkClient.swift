@@ -1,10 +1,16 @@
 import Foundation
 import SwiftUI
 
-public struct MediaNetworkClient: NetworkClientProtocol {
+public struct MediaNetworkClient<R: Media>: NetworkClientProtocol {
     public let networkInterfaced: NetworkInterfaced
-    public let host: URL
+    public let baseURL: URL
     public let baseHeaders: [String : String]
+
+    public init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String]) {
+        self.networkInterfaced = networkInterfaced
+        self.baseURL = baseURL
+        self.baseHeaders = baseHeaders
+    }
 
     public func performRequest(
         to endpoint: String,
@@ -13,7 +19,7 @@ public struct MediaNetworkClient: NetworkClientProtocol {
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
-    ) async throws -> NetworkResponse<Image> {
+    ) async throws -> NetworkResponse<R> {
         let request = HTTPRequest(
             url: composeURL(endpoint, queryItems: queryItems),
             method: method,
@@ -29,7 +35,7 @@ extension MediaNetworkClient {
     public func process(
         response: HTTPResponse,
         expectedStatusCode: Int
-    ) throws -> NetworkResponse<Image> {
+    ) throws -> NetworkResponse<R> {
         guard let urlResponse = response.urlResponse as? HTTPURLResponse
         else { throw NetworkError.badURLResponse }
 
@@ -39,24 +45,8 @@ extension MediaNetworkClient {
         guard let headers = urlResponse.allHeaderFields as? [String : String]
         else { throw NetworkError.notParseableHeaders }
 
-        guard let decoded = Image(from: response.body)
-        else { throw NetworkError.notDecodableImage }
+        guard let decoded = R.generate(from: response.body)
+        else { throw NetworkError.notDecodableMedia }
         return .init(headers: headers, body: decoded, url: urlResponse.url)
-    }
-}
-
-extension Image {
-    public init?(from data: Data) {
-        #if canImport(UIKit)
-            guard let uiImage = UIImage(data: data)
-            else { return nil}
-            self.init(uiImage: uiImage)
-        #elseif canImport(AppKit)
-            guard let nsImage = NSImage(data: data)
-            else { return nil }
-            self.init(nsImage: nsImage)
-        #else
-            return nil
-        #endif
     }
 }

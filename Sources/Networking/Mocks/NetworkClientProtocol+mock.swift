@@ -1,6 +1,6 @@
 import Foundation
 
-extension NetworkClient {
+extension NetworkClientProtocol {
 
     /// Creates a mocked instance of NetworkClient.
     ///

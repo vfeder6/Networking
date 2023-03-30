@@ -3,7 +3,7 @@ import Foundation
 /// A client that processes input and output data for network requests.
 public struct NetworkClient<R: Response>: NetworkClientProtocol {
     public let networkInterfaced: NetworkInterfaced
-    public let host: URL
+    public let baseURL: URL
     public let baseHeaders: [String : String]
 
     /// Initializes an instance with a base URL and base headers.
@@ -11,9 +11,9 @@ public struct NetworkClient<R: Response>: NetworkClientProtocol {
     /// - Parameter networkInterfaced: The entity responsible of performing the network request.
     /// - Parameter baseURL: The starting base URL
     /// - Parameter baseHeaders: The starting base headers
-    init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String]) {
+    public init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String]) {
         self.networkInterfaced = networkInterfaced
-        self.host = baseURL
+        self.baseURL = baseURL
         self.baseHeaders = baseHeaders
     }
 }
@@ -58,7 +58,8 @@ extension NetworkClient {
                 Error returned from the server is not a `NetworkError`.
                 Please, raise an issue here: https://github.com/vfeder6/Networking/issues
                 containing all the possible needed information to reproduce this bug.
-                """)
+                """
+            )
             return .failure(._unknown)
         }
     }

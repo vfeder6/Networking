@@ -4,8 +4,10 @@ public protocol NetworkClientProtocol {
     associatedtype R: Equatable
 
     var networkInterfaced: NetworkInterfaced { get }
-    var host: URL { get }
+    var baseURL: URL { get }
     var baseHeaders: [String : String] { get }
+
+    init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String])
 
     func performRequest(
         to endpoint: String,
@@ -73,7 +75,7 @@ extension NetworkClientProtocol {
         let endpointURL: URL
 
         if endpoint == "" {
-            endpointURL = host
+            endpointURL = baseURL
         } else {
             if endpoint.contains("?") {
                 raiseRuntimeWarning(
@@ -86,7 +88,7 @@ extension NetworkClientProtocol {
                     """
                 )
             }
-            endpointURL = host.appending(path: endpoint)
+            endpointURL = baseURL.appending(path: endpoint)
         }
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
