@@ -172,7 +172,7 @@ extension NetworkClient {
 
 // MARK: - Instance
 
-extension NetworkClient {
+extension NetworkClientProtocol {
 
     /// Creates a live instance of `NetworkClient`.
     ///
@@ -180,7 +180,7 @@ extension NetworkClient {
     /// - Parameter baseHeaders: The base headers
     ///
     /// - Returns: The live instance of `NetworkClient`.
-    public static func live(baseURL: URL, baseHeaders: [String : String] = [:]) -> NetworkClient {
+    public static func live(baseURL: URL, baseHeaders: [String : String] = [:]) -> Self {
         .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders)
     }
 }
