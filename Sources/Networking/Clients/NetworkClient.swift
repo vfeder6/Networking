@@ -1,10 +1,10 @@
 import Foundation
 
 /// A client that processes input and output data for network requests.
-public struct NetworkClient<R: Response> {
-    private let networkInterfaced: NetworkInterfaced
-    private let host: URL
-    private let baseHeaders: [String : String]
+public struct NetworkClient<R: Response>: NetworkClientProtocol {
+    public let networkInterfaced: NetworkInterfaced
+    public let host: URL
+    public let baseHeaders: [String : String]
 
     /// Initializes an instance with a base URL and base headers.
     ///
@@ -15,42 +15,6 @@ public struct NetworkClient<R: Response> {
         self.networkInterfaced = networkInterfaced
         self.host = baseURL
         self.baseHeaders = baseHeaders
-    }
-}
-
-// MARK: - Public API, main method
-
-extension NetworkClient {
-
-    /// Performs a network request.
-    ///
-    /// - Parameter endpoint: The endpoint to append to `baseURL`
-    /// - Parameter queryItems: The query items to append at the end of the URL
-    /// - Parameter body: The `Request` entity used to generate a JSON body
-    /// - Parameter method: The HTTP method to use
-    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
-    /// - Parameter expectedStatusCode: The expected response status code
-    /// - Parameter type: The `Decodable` type expected in the response body
-    ///
-    /// - Returns: A `NetworkResponse` entity.
-    ///
-    /// - Throws: A `NetworkError`.
-    public func performRequest(
-        to endpoint: String,
-        queryItems: [URLQueryItem],
-        body: (any Request)?,
-        method: HTTPMethod,
-        additionalHeaders: [String : String],
-        expectedStatusCode: Int
-    ) async throws -> NetworkResponse<R> {
-        let request = HTTPRequest(
-            url: composeURL(endpoint, queryItems: queryItems),
-            method: method,
-            headers: composeHeaders(additionalHeaders),
-            body: try encodeBody(body)
-        )
-        let response = try await networkInterfaced.send(request: request)
-        return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }
 
@@ -175,54 +139,10 @@ extension NetworkClient {
     }
 }
 
-// MARK: - Request data processing
-
-extension NetworkClient {
-    private func composeHeaders(_ additionalHeaders: [String : String]?) -> [String : String] {
-        var allHeaders = baseHeaders
-        additionalHeaders.map { headers in
-            headers.forEach { header in
-                allHeaders[header.key] = header.value
-            }
-        }
-        return allHeaders
-    }
-
-    private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
-        let endpointURL: URL
-
-        if endpoint == "" {
-            endpointURL = host
-        } else {
-            if endpoint.contains("?") {
-                raiseRuntimeWarning(
-                    """
-                    Are you passing an endpoint with already a query item?
-                    The endpoint will be url encoded and characters like `?` will be encoded as well, possibly resulting
-                    in a bad URL.
-                    Please, use the `queryItems` parameter in each method available in `NetworkClient` to add query items at
-                    the end of the URL.
-                    """
-                )
-            }
-            endpointURL = host.appending(path: endpoint)
-        }
-        return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
-    }
-
-    private func encodeBody(_ request: (any Request)?) throws -> Data? {
-        try request.map { body in
-            guard let data = try? JSONEncoder().encode(body)
-            else { throw NetworkError.notEncodableData }
-            return data
-        }
-    }
-}
-
 // MARK: - Response data processing
 
 extension NetworkClient {
-    private func process(
+    public func process(
         response: HTTPResponse,
         expectedStatusCode: Int
     ) throws -> NetworkResponse<R> {

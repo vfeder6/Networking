@@ -17,6 +17,8 @@ public enum NetworkError: Error {
     /// Data received in the response body is not decodable
     case notDecodableData(model: any Response.Type, json: String?)
 
+    case notDecodableImage
+
     /// Headers were not parseable in the response
     case notParseableHeaders
 
