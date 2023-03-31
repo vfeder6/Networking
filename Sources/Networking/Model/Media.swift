@@ -2,19 +2,15 @@ import Foundation
 import SwiftUI
 
 public protocol Media: Equatable {
-    static func generate(from data: Data) -> Self?
+    static func decode(from data: Data) -> Self?
 }
 
 extension Image: Media {
-    public static func generate(from data: Data) -> Image? {
+    public static func decode(from data: Data) -> Self? {
         #if canImport(UIKit)
-            guard let uiImage = UIImage(data: data)
-            else { return nil}
-            return .init(uiImage: uiImage)
+            return UIImage(data: data).map(Image.init(uiImage:))
         #elseif canImport(AppKit)
-            guard let nsImage = NSImage(data: data)
-            else { return nil }
-            return .init(nsImage: nsImage)
+            return NSImage(data: data).map(Image.init(nsImage:))
         #else
             return nil
         #endif

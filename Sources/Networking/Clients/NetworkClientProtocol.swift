@@ -53,7 +53,10 @@ extension NetworkClientProtocol {
             headers: composeHeaders(additionalHeaders),
             body: try encodeBody(body)
         )
-        let response = try await networkInterfaced.send(request: request)
+
+        guard let response = try await networkInterfaced.send(request: request) as? HTTPResponse else {
+            throw NetworkError.wrongHTTPResponseType
+        }
         return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }

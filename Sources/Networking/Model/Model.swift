@@ -11,6 +11,8 @@ public enum NetworkError: Error {
     /// Could not cast `URLResponse` as `HTTPURLResponse`
     case badURLResponse
 
+    case wrongHTTPResponseType
+
     /// Status code between the request and response do not match
     case mismatchingStatusCodes(expected: Int, actual: Int)
 

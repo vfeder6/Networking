@@ -7,7 +7,19 @@ public struct HTTPRequest {
     let body: Data?
 }
 
-public struct HTTPResponse {
-    let body: Data
-    let urlResponse: URLResponse
+public struct HTTPResponse: HTTPResponseProtocol {
+    public let body: Data
+    public let urlResponse: URLResponse
+}
+
+public struct HTTPResponseMock: HTTPResponseProtocol {
+    public let body: any Equatable
+    public let urlResponse: URLResponse
+}
+
+public protocol HTTPResponseProtocol {
+    associatedtype RawResponseType
+
+    var body: RawResponseType { get }
+    var urlResponse: URLResponse { get }
 }

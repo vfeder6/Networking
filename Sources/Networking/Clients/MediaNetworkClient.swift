@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-public struct MediaNetworkClient<R: Media>: NetworkClientProtocol {
+public struct MediaNetworkClient<M: Media>: NetworkClientProtocol {
     public let networkInterfaced: NetworkInterfaced
     public let baseURL: URL
     public let baseHeaders: [String : String]
@@ -19,14 +19,17 @@ public struct MediaNetworkClient<R: Media>: NetworkClientProtocol {
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
-    ) async throws -> NetworkResponse<R> {
+    ) async throws -> NetworkResponse<M> {
         let request = HTTPRequest(
             url: composeURL(endpoint, queryItems: queryItems),
             method: method,
             headers: composeHeaders(additionalHeaders),
             body: try encodeBody(body)
         )
-        let response = try await networkInterfaced.send(request: request)
+
+        guard let response = try await networkInterfaced.send(request: request) as? HTTPResponse else {
+            throw NetworkError.wrongHTTPResponseType
+        }
         return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }
@@ -35,7 +38,7 @@ extension MediaNetworkClient {
     public func process(
         response: HTTPResponse,
         expectedStatusCode: Int
-    ) throws -> NetworkResponse<R> {
+    ) throws -> NetworkResponse<M> {
         guard let urlResponse = response.urlResponse as? HTTPURLResponse
         else { throw NetworkError.badURLResponse }
 
@@ -45,7 +48,7 @@ extension MediaNetworkClient {
         guard let headers = urlResponse.allHeaderFields as? [String : String]
         else { throw NetworkError.notParseableHeaders }
 
-        guard let decoded = R.generate(from: response.body)
+        guard let decoded = M.decode(from: response.body)
         else { throw NetworkError.notDecodableMedia }
         return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
