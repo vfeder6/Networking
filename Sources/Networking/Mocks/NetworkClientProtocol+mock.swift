@@ -1,36 +1,40 @@
 import Foundation
 
-extension NetworkClientProtocol {
+extension NetworkClient {
 
-    /// Creates a mocked instance of NetworkClient.
+    /// Creates a mocked instance of a `NetworkClient` type.
     ///
     /// - Parameter result: The desired response
     /// - Parameter statusCode: The desired status code
-    /// - Parameter sleepDuration: The amount of time the current Task has to sleep before returning the mocked data,
+    /// - Parameter sleepDuration: The amount of time the current `Task` has to sleep before returning the mocked data,
     /// simulating a delay from the server
     ///
-    /// - Returns: The mocked NetworkClient instance.
-    ///
-    /// - Throws: The error passed in `result`, if it's `.failure`.
+    /// - Returns: The mocked `NetworkClient` instance.
     public static func mock(
         returning result: Result<R, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
-    ) throws -> Self {
-        .init(networkInterfaced: URLSessionMock(
-            response: result.map { _ in () },
-            expectedStatusCode: statusCode,
-            respondsAfter: sleepDuration
-        ), baseURL: .init(string: "https://example.com")!, baseHeaders: [:]) { data in
-            if case .success(let success) = result {
-                return success
-            } else {
-                throw NetworkMockError.boh
+    ) -> Self {
+        .init(
+            networkInterfaced: URLSessionMock(
+                response: result.map { _ in () },
+                expectedStatusCode: statusCode,
+                respondsAfter: sleepDuration
+            ),
+            baseURL: .init(string: "https://example.com")!,
+            baseHeaders: [:],
+            decode: { _ in
+                switch result {
+                case .success(let success):
+                    return success
+                case .failure:
+                    throw NetworkMockError.decodeExpression
+                }
             }
-        }
+        )
     }
 }
 
 enum NetworkMockError: Error {
-    case boh
+    case decodeExpression
 }

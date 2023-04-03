@@ -23,10 +23,10 @@ public protocol Microservice: Service {
     associatedtype R: Response
 
     /// The client that will perform the network requests.
-    var networkClient: NetworkClient<R> { get }
+    var networkClient: JSONNetworkClient<R> { get }
 
     /// The defualt initializer that stores the injected `NetworkClient` instance.
-    init(networkClient: NetworkClient<R>)
+    init(networkClient: JSONNetworkClient<R>)
 }
 
 public protocol MediaService: Service {

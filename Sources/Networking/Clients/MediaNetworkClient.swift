@@ -1,41 +1,22 @@
 import Foundation
 import SwiftUI
 
-public struct MediaNetworkClient<M: Media>: NetworkClientProtocol {
+public struct MediaNetworkClient<M: Media>: NetworkClient {
     public let networkInterfaced: NetworkInterfaced
     public let baseURL: URL
     public let baseHeaders: [String : String]
-    public let decodeExpression: (Data) throws -> M
+    public let decode: (Data) throws -> M
 
     public init(
         networkInterfaced: NetworkInterfaced,
         baseURL: URL,
         baseHeaders: [String : String],
-        decodeExpression: @escaping (Data) throws -> M
+        decode: ((Data) throws -> R)? = nil
     ) {
         self.networkInterfaced = networkInterfaced
         self.baseURL = baseURL
         self.baseHeaders = baseHeaders
-        self.decodeExpression = decodeExpression
-    }
-
-    public func performRequest(
-        to endpoint: String,
-        queryItems: [URLQueryItem],
-        body: (any Request)?,
-        method: HTTPMethod,
-        additionalHeaders: [String : String],
-        expectedStatusCode: Int
-    ) async throws -> NetworkResponse<M> {
-        let request = HTTPRequest(
-            url: composeURL(endpoint, queryItems: queryItems),
-            method: method,
-            headers: composeHeaders(additionalHeaders),
-            body: try encodeBody(body)
-        )
-
-        let response = try await networkInterfaced.send(request: request)
-        return try process(response: response, expectedStatusCode: expectedStatusCode)
+        self.decode = decode ?? { try R.decode(from: $0) }
     }
 }
 
@@ -53,8 +34,8 @@ extension MediaNetworkClient {
         guard let headers = urlResponse.allHeaderFields as? [String : String]
         else { throw NetworkError.notParseableHeaders }
 
-        guard let decoded = try? decodeExpression(response.body)
-        else { throw NetworkError.notDecodableMedia }
+        guard let decoded = try? decode(response.body)
+        else { throw NetworkError.notDecodableData(response.body) }
         return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
 }
@@ -70,8 +51,11 @@ extension MediaNetworkClient {
     ///
     /// - Returns: The live instance of `NetworkClient`.
     public static func live(baseURL: URL, baseHeaders: [String : String] = [:]) -> Self {
-        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders) { data in
-            try M.decode(from: data)
-        }
+        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders)
     }
+}
+
+public enum DecodingStrategy {
+    case json
+    case media
 }

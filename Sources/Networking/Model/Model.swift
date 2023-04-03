@@ -6,7 +6,7 @@ public enum HTTPMethod: String {
     case patch = "PATCH"
 }
 
-public enum NetworkError: Error {
+public enum NetworkError: Error, Equatable {
 
     /// Could not cast `URLResponse` as `HTTPURLResponse`
     case badURLResponse
@@ -17,9 +17,7 @@ public enum NetworkError: Error {
     case mismatchingStatusCodes(expected: Int, actual: Int)
 
     /// Data received in the response body is not decodable
-    case notDecodableData(model: any Response.Type, json: String?)
-
-    case notDecodableMedia
+    case notDecodableData(Data)
 
     /// Headers were not parseable in the response
     case notParseableHeaders
@@ -41,31 +39,6 @@ public enum NetworkError: Error {
     /// Note that this should not happen because the `NetworkRequestExecutor` entity catches every error thrown
     /// by `URLSession` and throws the `.urlSession(error:)` case.
     case _unknown
-}
-
-extension NetworkError: Equatable {
-    public static func == (lhs: NetworkError, rhs: NetworkError) -> Bool {
-        switch (lhs, rhs) {
-        case (.badURLResponse, .badURLResponse),
-            (.notParseableHeaders, .notParseableHeaders),
-            (.notEncodableData, .notEncodableData),
-            (.mismatchingRequestedResponseType, .mismatchingRequestedResponseType),
-            (._unknown, ._unknown):
-            return true
-
-        case let (.mismatchingStatusCodes(lhsExpected, lhsActual), .mismatchingStatusCodes(rhsExpected, rhsActual)):
-            return lhsExpected == rhsExpected && lhsActual == rhsActual
-
-        case let (.notDecodableData(lhsModel, lhsJSON), .notDecodableData(rhsModel, rhsJSON)):
-            return lhsModel == rhsModel && lhsJSON == rhsJSON
-
-        case let (.urlSession(lhsDescription), .urlSession(rhsDescription)):
-            return lhsDescription == rhsDescription
-
-        default:
-            return false
-        }
-    }
 }
 
 public struct NetworkResponse<Body: Equatable>: Equatable {

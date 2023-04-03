@@ -8,9 +8,7 @@ struct URLSessionMock: NetworkInterfaced {
 
     /// Initializer allowing to mock the response that `URLSession` gives back.
     ///
-    /// - Parameter response: The expected response
-    /// - Parameter responseURL: Used only to build the mandatory HTTPURLResponse object coming from the
-    /// method `upload(for:from:)` of `URLSession`
+    /// - Parameter response: The expected result of the operation
     /// - Parameter expectedStatusCode: The expected status code to give to `HTTPURLResponse`
     /// - Parameter sleepDuration: The delay in which the `send(request:)` method will return
     init(
@@ -25,8 +23,9 @@ struct URLSessionMock: NetworkInterfaced {
 
     /// This method returns an `HTTPResponse` or throws error based on what `response` has been passed to the `init`.
     ///
-    /// Before actually executing returning or throwing error, this method will hang on the current Task for the
-    /// duration specified in the initializer.
+    /// Before actually returning or throwing error, this method will hang on the current Task for the duration
+    /// specified in the initializer.
+    /// The returned `HTTPResponse` contains an empty body `Data` to ignore decoding during tests.
     func send(request: HTTPRequest) async throws -> HTTPResponse {
         try await Task.sleep(for: sleepDuration)
 
