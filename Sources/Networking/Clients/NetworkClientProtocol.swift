@@ -6,8 +6,14 @@ public protocol NetworkClientProtocol {
     var networkInterfaced: NetworkInterfaced { get }
     var baseURL: URL { get }
     var baseHeaders: [String : String] { get }
+    var decodeExpression: (Data) throws -> R { get }
 
-    init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String])
+    init(
+        networkInterfaced: NetworkInterfaced,
+        baseURL: URL,
+        baseHeaders: [String : String],
+        decodeExpression: @escaping (Data) throws -> R
+    )
 
     func performRequest(
         to endpoint: String,
@@ -54,9 +60,7 @@ extension NetworkClientProtocol {
             body: try encodeBody(body)
         )
 
-        guard let response = try await networkInterfaced.send(request: request) as? HTTPResponse else {
-            throw NetworkError.wrongHTTPResponseType
-        }
+        let response = try await networkInterfaced.send(request: request)
         return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }

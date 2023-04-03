@@ -11,14 +11,14 @@ public protocol NetworkInterfaced {
     /// - Returns: A `HTTPResponse` entity
     ///
     /// - Throws: Every error thrown by the `upload(for:from:)` method of `URLSession`.
-    func send(request: HTTPRequest) async throws -> any HTTPResponseProtocol
+    func send(request: HTTPRequest) async throws -> HTTPResponse
 }
 
 extension URLSession: NetworkInterfaced {
-    public func send(request: HTTPRequest) async throws -> any HTTPResponseProtocol {
+    public func send(request: HTTPRequest) async throws -> HTTPResponse {
         do {
             let (data, response) = try await upload(for: request.urlRequest, from: request.body ?? .init())
-            return HTTPResponse(body: data, urlResponse: response)
+            return .init(body: data, urlResponse: response)
         } catch {
             throw NetworkError.urlSession(description: error.localizedDescription)
         }

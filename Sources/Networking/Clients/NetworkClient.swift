@@ -5,16 +5,23 @@ public struct NetworkClient<R: Response>: NetworkClientProtocol {
     public let networkInterfaced: NetworkInterfaced
     public let baseURL: URL
     public let baseHeaders: [String : String]
+    public let decodeExpression: (Data) throws -> R
 
     /// Initializes an instance with a base URL and base headers.
     ///
     /// - Parameter networkInterfaced: The entity responsible of performing the network request.
     /// - Parameter baseURL: The starting base URL
     /// - Parameter baseHeaders: The starting base headers
-    public init(networkInterfaced: NetworkInterfaced, baseURL: URL, baseHeaders: [String : String]) {
+    public init(
+        networkInterfaced: NetworkInterfaced,
+        baseURL: URL,
+        baseHeaders: [String : String],
+        decodeExpression: @escaping (Data) throws -> R
+    ) {
         self.networkInterfaced = networkInterfaced
         self.baseURL = baseURL
         self.baseHeaders = baseHeaders
+        self.decodeExpression = decodeExpression
     }
 }
 
@@ -160,7 +167,7 @@ extension NetworkClient {
             return .init(headers: headers, body: nil, url: urlResponse.url)
         }
 
-        guard let decoded = try? JSONDecoder().decode(R.self, from: response.body) else {
+        guard let decoded = try? decodeExpression(response.body) else {
             throw NetworkError.notDecodableData(
                 model: R.self,
                 json: response.body.prettyPrintedJSON
@@ -172,7 +179,7 @@ extension NetworkClient {
 
 // MARK: - Instance
 
-extension NetworkClientProtocol {
+extension NetworkClient {
 
     /// Creates a live instance of `NetworkClient`.
     ///
@@ -181,6 +188,8 @@ extension NetworkClientProtocol {
     ///
     /// - Returns: The live instance of `NetworkClient`.
     public static func live(baseURL: URL, baseHeaders: [String : String] = [:]) -> Self {
-        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders)
+        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders) { data in
+            try JSONDecoder().decode(R.self, from: data)
+        }
     }
 }

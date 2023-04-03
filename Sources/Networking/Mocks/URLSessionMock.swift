@@ -2,7 +2,7 @@ import Foundation
 
 /// Entity that simulates the `URLSession` behavior.
 struct URLSessionMock: NetworkInterfaced {
-    private let response: Result<any Equatable, NetworkError>
+    private let response: Result<Void, NetworkError>
     private let expectedStatusCode: Int
     private var sleepDuration: Duration
 
@@ -14,7 +14,7 @@ struct URLSessionMock: NetworkInterfaced {
     /// - Parameter expectedStatusCode: The expected status code to give to `HTTPURLResponse`
     /// - Parameter sleepDuration: The delay in which the `send(request:)` method will return
     init(
-        response: Result<any Equatable, NetworkError>,
+        response: Result<Void, NetworkError>,
         expectedStatusCode: Int,
         respondsAfter sleepDuration: Duration
     ) {
@@ -27,12 +27,12 @@ struct URLSessionMock: NetworkInterfaced {
     ///
     /// Before actually executing returning or throwing error, this method will hang on the current Task for the
     /// duration specified in the initializer.
-    func send(request: HTTPRequest) async throws -> any HTTPResponseProtocol {
+    func send(request: HTTPRequest) async throws -> HTTPResponse {
         try await Task.sleep(for: sleepDuration)
 
         switch response {
-        case .success(let response):
-            return HTTPResponseMock(body: response, urlResponse: HTTPURLResponse(
+        case .success:
+            return .init(body: .init(), urlResponse: HTTPURLResponse(
                 url: request.url,
                 statusCode: expectedStatusCode,
                 httpVersion: nil,

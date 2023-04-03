@@ -18,9 +18,19 @@ extension NetworkClientProtocol {
         after sleepDuration: Duration = .zero
     ) throws -> Self {
         .init(networkInterfaced: URLSessionMock(
-            response: result as! Result<any Equatable, NetworkError>,
+            response: result.map { _ in () },
             expectedStatusCode: statusCode,
             respondsAfter: sleepDuration
-        ), baseURL: .init(string: "https://example.com")!, baseHeaders: [:])
+        ), baseURL: .init(string: "https://example.com")!, baseHeaders: [:]) { data in
+            if case .success(let success) = result {
+                return success
+            } else {
+                throw NetworkMockError.boh
+            }
+        }
     }
+}
+
+enum NetworkMockError: Error {
+    case boh
 }
