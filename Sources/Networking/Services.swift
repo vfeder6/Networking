@@ -4,7 +4,7 @@ import Foundation
 public protocol Microservice {
 
     /// The response model used to decode the response body.
-    associatedtype R: Response
+    associatedtype R: Equatable
 
     /// The client that will perform the network requests.
     var networkClient: NetworkClient<R> { get }
