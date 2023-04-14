@@ -23,11 +23,18 @@ extension NetworkClient {
             ),
             baseURL: .init(string: "https://example.com")!,
             baseHeaders: [:],
-            decoder: MockDataDecoder()
+            decoder: MockDataDecoder(model: result.discarded)
         )
     }
 }
 
-enum NetworkMockError: Error {
-    case decodeExpression
+extension Result {
+    var discarded: Any {
+        switch self {
+        case .success(let success):
+            return success
+        case .failure(let failure):
+            return failure
+        }
+    }
 }

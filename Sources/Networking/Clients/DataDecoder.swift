@@ -35,15 +35,10 @@ public struct MediaDataDecoder: DataDecoder {
 }
 
 public struct MockDataDecoder: DataDecoder {
+    let model: Any
+
     public func decode<T>(_ type: T.Type, from data: Data) throws -> T {
-        #warning("To be implemented")
-        guard let responseType = type as? EmptyMockModel.Type
-        else { throw NetworkError._unknown }
-
-        guard let response = EmptyMockModel() as? T
-        else { throw NetworkError._unknown }
-
-        return response
+        model as! T
     }
 }
 

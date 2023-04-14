@@ -81,7 +81,7 @@ final class NetworkClientTests: XCTestCase {
             ),
             baseURL: url,
             baseHeaders: baseHeaders,
-            decoder: MockDataDecoder()
+            decoder: MockDataDecoder(model: model)
         )
     }
 }
