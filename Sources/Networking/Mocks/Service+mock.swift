@@ -1,4 +1,4 @@
-extension Service {
+extension Microservice {
 
     /// The mocked implementation of the service.
     ///

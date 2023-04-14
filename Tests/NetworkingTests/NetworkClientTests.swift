@@ -2,7 +2,7 @@ import XCTest
 @testable import Networking
 
 final class NetworkClientTests: XCTestCase {
-    private var uut: JSONNetworkClient<EmptyModel>!
+    private var uut: NetworkClient<EmptyMockModel>!
 
     func test_urlComposition() async {
         initialize()
@@ -80,18 +80,15 @@ final class NetworkClientTests: XCTestCase {
                 respondsAfter: delay
             ),
             baseURL: url,
-            baseHeaders: baseHeaders, decode: { _ in .init() }
+            baseHeaders: baseHeaders,
+            decoder: MockDataDecoder()
         )
     }
 }
 
 extension NetworkClientTests {
-    private var model: EmptyModel {
+    private var model: EmptyMockModel {
         .init()
-    }
-
-    private var encodedModel: Data {
-        try! JSONEncoder().encode(model)
     }
 
     private var url: URL {
@@ -110,5 +107,3 @@ extension NetworkClientTests {
         [:]
     }
 }
-
-private struct EmptyModel: DTO { }

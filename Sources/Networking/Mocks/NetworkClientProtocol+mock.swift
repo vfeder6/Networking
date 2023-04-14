@@ -23,14 +23,7 @@ extension NetworkClient {
             ),
             baseURL: .init(string: "https://example.com")!,
             baseHeaders: [:],
-            decode: { _ in
-                switch result {
-                case .success(let success):
-                    return success
-                case .failure:
-                    throw NetworkMockError.decodeExpression
-                }
-            }
+            decoder: MockDataDecoder()
         )
     }
 }
