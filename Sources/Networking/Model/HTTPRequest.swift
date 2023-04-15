@@ -1,7 +1,7 @@
 import Foundation
 
 /// Raw HTTP request
-public struct HTTPRequest {
+struct HTTPRequest {
 
     let url: URL
     let method: HTTPMethod

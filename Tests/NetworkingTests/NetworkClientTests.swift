@@ -73,16 +73,7 @@ final class NetworkClientTests: XCTestCase {
     }
 
     private func initialize() {
-        uut = .init(
-            networkInterfaced: URLSessionMock(
-                response: .success(()),
-                expectedStatusCode: statusCode,
-                respondsAfter: delay
-            ),
-            baseURL: url,
-            baseHeaders: baseHeaders,
-            decoder: MockDataDecoder(model: model)
-        )
+        uut = .mock(returning: .success(.init()), expecting: statusCode)
     }
 }
 

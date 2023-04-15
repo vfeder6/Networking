@@ -1,11 +1,11 @@
 import Foundation
 
-public protocol DataDecoder {
+protocol DataDecoder {
     func decode<T>(_ type: T.Type, from data: Data) throws -> T
 }
 
-public struct JSONDataDecoder: DataDecoder {
-    public func decode<T>(_ type: T.Type, from data: Data) throws -> T {
+struct JSONDataDecoder: DataDecoder {
+    func decode<T>(_ type: T.Type, from data: Data) throws -> T {
         guard let responseType = type as? any Response.Type
         else { throw NetworkError._unknown }
 
@@ -19,8 +19,8 @@ public struct JSONDataDecoder: DataDecoder {
     }
 }
 
-public struct MediaDataDecoder: DataDecoder {
-    public func decode<T>(_ type: T.Type, from data: Data) throws -> T {
+struct MediaDataDecoder: DataDecoder {
+    func decode<T>(_ type: T.Type, from data: Data) throws -> T {
         guard let responseType = type as? any Media.Type
         else { throw NetworkError._unknown }
 

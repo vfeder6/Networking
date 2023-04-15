@@ -1,7 +1,7 @@
 import Foundation
 
 /// Entity providing an interface to the network.
-public protocol NetworkInterfaced {
+protocol NetworkInterfaced {
 
     /// Sends the given `HTTPRequest` and gives back a `HTTPResponse`.
     /// The live implementation of this protocol wraps the `upload(for:from:)` method of `URLSession`.
@@ -16,7 +16,7 @@ public protocol NetworkInterfaced {
 
 extension URLSession: NetworkInterfaced {
 
-    public func send(request: HTTPRequest) async throws -> HTTPResponse {
+    func send(request: HTTPRequest) async throws -> HTTPResponse {
         do {
             let (data, response) = try await upload(for: request.urlRequest, from: request.body ?? .init())
             return .init(body: data, urlResponse: response)

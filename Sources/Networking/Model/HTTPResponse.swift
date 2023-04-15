@@ -1,7 +1,7 @@
 import Foundation
 
 /// Raw HTTP response
-public struct HTTPResponse {
+struct HTTPResponse {
 
     public let body: Data
     public let urlResponse: URLResponse

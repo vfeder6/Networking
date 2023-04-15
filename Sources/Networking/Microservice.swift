@@ -4,16 +4,16 @@ import Foundation
 public protocol Microservice {
 
     /// The response model used to decode the response body.
-    associatedtype R: Equatable
+    associatedtype ResponseType: Equatable
 
     /// The client that will perform the network requests.
-    var networkClient: NetworkClient<R> { get }
+    var networkClient: NetworkClient<ResponseType> { get }
 
     /// Live implementation of the service.
     static var live: Self { get }
 
     /// The defualt initializer that stores the injected `NetworkClient` instance.
-    init(networkClient: NetworkClient<R>)
+    init(networkClient: NetworkClient<ResponseType>)
 }
 
 extension Microservice {

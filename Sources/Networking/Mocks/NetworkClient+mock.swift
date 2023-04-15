@@ -1,6 +1,6 @@
 import Foundation
 
-extension NetworkClient {
+public extension NetworkClient {
 
     /// Creates a mocked instance of a `NetworkClient` type.
     ///
@@ -10,8 +10,8 @@ extension NetworkClient {
     /// simulating a delay from the server
     ///
     /// - Returns: The mocked `NetworkClient` instance.
-    public static func mock(
-        returning result: Result<R, NetworkError>,
+    static func mock(
+        returning result: Result<ResponseType, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
     ) -> Self {

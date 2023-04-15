@@ -1,12 +1,12 @@
 import Foundation
 
 /// Entity that processes input and output data for network requests.
-public struct NetworkClient<R: Equatable> {
+public struct NetworkClient<ResponseType: Equatable> {
 
-    public let networkInterfaced: NetworkInterfaced
-    public let baseURL: URL
-    public let baseHeaders: [String : String]
-    public let decoder: DataDecoder
+    private let networkInterfaced: NetworkInterfaced
+    private let baseURL: URL
+    private let baseHeaders: [String : String]
+    private let decoder: DataDecoder
 
     /// Initializes an instance with a base URL and base headers.
     ///
@@ -14,7 +14,7 @@ public struct NetworkClient<R: Equatable> {
     /// - Parameter baseURL: The starting base URL
     /// - Parameter baseHeaders: The starting base headers
     /// - Parameter decoder: Entity used to decode the response received from the server
-    public init(
+    init(
         networkInterfaced: NetworkInterfaced,
         baseURL: URL,
         baseHeaders: [String : String],
@@ -27,9 +27,46 @@ public struct NetworkClient<R: Equatable> {
     }
 }
 
+// MARK: - Public API, main method
+
+public extension NetworkClient {
+
+    /// Performs a network request.
+    ///
+    /// - Parameter endpoint: The endpoint to append to `baseURL`
+    /// - Parameter queryItems: The query items to append at the end of the URL
+    /// - Parameter body: The `Request` entity used to generate a JSON body
+    /// - Parameter method: The HTTP method to use
+    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
+    /// - Parameter expectedStatusCode: The expected response status code
+    /// - Parameter type: The `Decodable` type expected in the response body
+    ///
+    /// - Returns: A `NetworkResponse` entity.
+    ///
+    /// - Throws: A `NetworkError`.
+    func performRequest(
+        to endpoint: String,
+        queryItems: [URLQueryItem],
+        body: (any Request)?,
+        method: HTTPMethod,
+        additionalHeaders: [String : String],
+        expectedStatusCode: Int
+    ) async throws -> NetworkResponse<ResponseType> {
+        let request = HTTPRequest(
+            url: composeURL(endpoint, queryItems: queryItems),
+            method: method,
+            headers: composeHeaders(additionalHeaders),
+            body: try encodeBody(body)
+        )
+
+        let response = try await networkInterfaced.send(request: request)
+        return try process(response: response, expectedStatusCode: expectedStatusCode)
+    }
+}
+
 // MARK: - Public API, auxiliary methods
 
-extension NetworkClient {
+public extension NetworkClient {
 
     /// Performs a network request, safely returning the full response from the server.
     ///
@@ -42,14 +79,14 @@ extension NetworkClient {
     /// - Parameter type: The `Decodable` type expected in the response body
     ///
     /// - Returns: A `Result` containing a `NetworkResponse` entity or `NetworkError`.
-    public func fullResponseResult(
+    func fullResponseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
-    ) async -> Result<NetworkResponse<R>, NetworkError> {
+    ) async -> Result<NetworkResponse<ResponseType>, NetworkError> {
         do {
             return .success(try await performRequest(
                 to: endpoint,
@@ -84,14 +121,14 @@ extension NetworkClient {
     /// - Parameter type: The `Decodable` type expected in the response body
     ///
     /// - Returns: A `Result` containing the `Response` entity or `NetworkError`.
-    public func responseResult(
+    func responseResult(
         from endpoint: String,
         queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
         additionalHeaders: [String : String],
         expectedStatusCode: Int
-    ) async -> Result<R, NetworkError> {
+    ) async -> Result<ResponseType, NetworkError> {
         let result = await fullResponseResult(
             from: endpoint,
             queryItems: queryItems,
@@ -112,8 +149,8 @@ extension NetworkClient {
         }
     }
 
-    /// Performs a network request, safely returning the error if present.
-    /// The body decoding is ignored only if `Response` is of type `EmptyModel`.
+    /// Performs a network request, returning the error if present.
+    /// The body decoding is ignored only if the declared `ResponseType` is of type `EmptyModel`.
     ///
     /// - Parameter endpoint: The endpoint to append to `baseURL`
     /// - Parameter queryItems: The query items to append at the end of the URL
@@ -123,7 +160,7 @@ extension NetworkClient {
     /// - Parameter expectedStatusCode: The expected response status code
     ///
     /// - Returns: A `Result` containing `Void` or `NetworkError`.
-    public func result(
+    func emptyResult(
         to endpoint: String,
         with queryItems: [URLQueryItem],
         body: (any Request)?,
@@ -149,68 +186,9 @@ extension NetworkClient {
     }
 }
 
-// MARK: - Response data processing
-
-extension NetworkClient {
-
-    func process(
-        response: HTTPResponse,
-        expectedStatusCode: Int
-    ) throws -> NetworkResponse<R> {
-        guard let urlResponse = response.urlResponse as? HTTPURLResponse
-        else { throw NetworkError.badURLResponse }
-
-        guard urlResponse.statusCode == expectedStatusCode
-        else { throw NetworkError.mismatchingStatusCodes(expected: expectedStatusCode, actual: urlResponse.statusCode) }
-
-        guard let headers = urlResponse.allHeaderFields as? [String : String]
-        else { throw NetworkError.notParseableHeaders }
-
-        guard R.Type.self != EmptyDTO.self
-        else { return .init(headers: headers, body: nil, url: urlResponse.url) }
-
-        guard let decoded = try? decoder.decode(R.self, from: response.body)
-        else { throw NetworkError.notDecodableData(response.body) }
-
-        return .init(headers: headers, body: decoded, url: urlResponse.url)
-    }
-
-    /// Performs a network request.
-    ///
-    /// - Parameter endpoint: The endpoint to append to `baseURL`
-    /// - Parameter queryItems: The query items to append at the end of the URL
-    /// - Parameter body: The `Request` entity used to generate a JSON body
-    /// - Parameter method: The HTTP method to use
-    /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
-    /// - Parameter expectedStatusCode: The expected response status code
-    /// - Parameter type: The `Decodable` type expected in the response body
-    ///
-    /// - Returns: A `NetworkResponse` entity.
-    ///
-    /// - Throws: A `NetworkError`.
-    public func performRequest(
-        to endpoint: String,
-        queryItems: [URLQueryItem],
-        body: (any Request)?,
-        method: HTTPMethod,
-        additionalHeaders: [String : String],
-        expectedStatusCode: Int
-    ) async throws -> NetworkResponse<R> {
-        let request = HTTPRequest(
-            url: composeURL(endpoint, queryItems: queryItems),
-            method: method,
-            headers: composeHeaders(additionalHeaders),
-            body: try encodeBody(body)
-        )
-
-        let response = try await networkInterfaced.send(request: request)
-        return try process(response: response, expectedStatusCode: expectedStatusCode)
-    }
-}
-
 // MARK: - Request data processing
 
-extension NetworkClient {
+private extension NetworkClient {
 
     func composeHeaders(_ additionalHeaders: [String : String]?) -> [String : String] {
         var allHeaders = baseHeaders
@@ -250,6 +228,33 @@ extension NetworkClient {
             else { throw NetworkError.notEncodableData }
             return data
         }
+    }
+}
+
+// MARK: - Response data processing
+
+private extension NetworkClient {
+
+    func process(
+        response: HTTPResponse,
+        expectedStatusCode: Int
+    ) throws -> NetworkResponse<ResponseType> {
+        guard let urlResponse = response.urlResponse as? HTTPURLResponse
+        else { throw NetworkError.badURLResponse }
+
+        guard urlResponse.statusCode == expectedStatusCode
+        else { throw NetworkError.mismatchingStatusCodes(expected: expectedStatusCode, actual: urlResponse.statusCode) }
+
+        guard let headers = urlResponse.allHeaderFields as? [String : String]
+        else { throw NetworkError.notParseableHeaders }
+
+        guard ResponseType.Type.self != EmptyDTO.self
+        else { return .init(headers: headers, body: nil, url: urlResponse.url) }
+
+        guard let decoded = try? decoder.decode(ResponseType.self, from: response.body)
+        else { throw NetworkError.notDecodableData(response.body) }
+
+        return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
 }
 
