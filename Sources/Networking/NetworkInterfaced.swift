@@ -15,6 +15,7 @@ public protocol NetworkInterfaced {
 }
 
 extension URLSession: NetworkInterfaced {
+
     public func send(request: HTTPRequest) async throws -> HTTPResponse {
         do {
             let (data, response) = try await upload(for: request.urlRequest, from: request.body ?? .init())
@@ -25,8 +26,9 @@ extension URLSession: NetworkInterfaced {
     }
 }
 
-extension HTTPRequest {
-    fileprivate var urlRequest: URLRequest {
+private extension HTTPRequest {
+
+    var urlRequest: URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method.rawValue
         headers.forEach { urlRequest.setValue($0.value, forHTTPHeaderField: $0.key) }

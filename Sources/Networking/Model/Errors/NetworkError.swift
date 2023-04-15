@@ -1,11 +1,5 @@
 import Foundation
 
-public enum HTTPMethod: String {
-    case get = "GET"
-    case post = "POST"
-    case patch = "PATCH"
-}
-
 public enum NetworkError: Error, Equatable {
 
     /// Could not cast `URLResponse` as `HTTPURLResponse`
@@ -40,22 +34,3 @@ public enum NetworkError: Error, Equatable {
     /// by `URLSession` and throws the `.urlSession(error:)` case.
     case _unknown
 }
-
-public struct NetworkResponse<Body: Equatable>: Equatable {
-    public let headers: [String : String]
-    public let body: Body?
-    let url: URL?
-}
-
-/// A convenience `protocol` for `Encodable` entities used for network requests
-public protocol Request: Encodable, Equatable { }
-
-/// A convenience `protocol` for `Decodable` entities used for network responses
-public protocol Response: Decodable, Equatable { }
-
-/// A convenience `protocol` for Data Transfer Objects (both `Encodable` and `Decodable`) used both for network
-/// requests and responses
-public protocol DTO: Request & Response { }
-
-/// An empty `DTO`, used to ignore the body decoding
-public struct EmptyDTO: DTO { }

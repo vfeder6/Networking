@@ -107,3 +107,5 @@ extension NetworkClientTests {
         [:]
     }
 }
+
+private struct EmptyMockModel: Response { }

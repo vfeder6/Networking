@@ -28,7 +28,8 @@ extension NetworkClient {
     }
 }
 
-extension Result {
+private extension Result {
+
     var discarded: Any {
         switch self {
         case .success(let success):

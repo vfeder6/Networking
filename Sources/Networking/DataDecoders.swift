@@ -6,7 +6,7 @@ public protocol DataDecoder {
 
 public struct JSONDataDecoder: DataDecoder {
     public func decode<T>(_ type: T.Type, from data: Data) throws -> T {
-        guard let responseType = type as? Decodable.Type
+        guard let responseType = type as? any Response.Type
         else { throw NetworkError._unknown }
 
         #warning("Fix error")
@@ -33,13 +33,3 @@ public struct MediaDataDecoder: DataDecoder {
         return response
     }
 }
-
-public struct MockDataDecoder: DataDecoder {
-    let model: Any
-
-    public func decode<T>(_ type: T.Type, from data: Data) throws -> T {
-        model as! T
-    }
-}
-
-struct EmptyMockModel: Response { }

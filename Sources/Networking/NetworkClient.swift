@@ -2,6 +2,7 @@ import Foundation
 
 /// Entity that processes input and output data for network requests.
 public struct NetworkClient<R: Equatable> {
+
     public let networkInterfaced: NetworkInterfaced
     public let baseURL: URL
     public let baseHeaders: [String : String]
@@ -151,6 +152,7 @@ extension NetworkClient {
 // MARK: - Response data processing
 
 extension NetworkClient {
+
     func process(
         response: HTTPResponse,
         expectedStatusCode: Int
@@ -209,6 +211,7 @@ extension NetworkClient {
 // MARK: - Request data processing
 
 extension NetworkClient {
+
     func composeHeaders(_ additionalHeaders: [String : String]?) -> [String : String] {
         var allHeaders = baseHeaders
         additionalHeaders.map { headers in

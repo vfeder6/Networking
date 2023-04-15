@@ -2,6 +2,7 @@ import Foundation
 
 /// Entity that simulates the `URLSession` behavior.
 struct URLSessionMock: NetworkInterfaced {
+
     private let response: Result<Void, NetworkError>
     private let expectedStatusCode: Int
     private var sleepDuration: Duration

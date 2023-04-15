@@ -2,10 +2,12 @@ import Foundation
 import SwiftUI
 
 public protocol Media: Equatable {
+
     static func decode(from data: Data) throws -> Self
 }
 
 extension Image: Media {
+
     public static func decode(from data: Data) throws -> Self {
         #if canImport(UIKit)
             guard let image = UIImage(data: data).map(Image.init(uiImage:))
@@ -19,8 +21,4 @@ extension Image: Media {
             throw MediaDecodingError.notDecodable
         #endif
     }
-}
-
-enum MediaDecodingError: Error {
-    case notDecodable
 }
