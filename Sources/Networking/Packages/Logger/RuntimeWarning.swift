@@ -1,27 +1,33 @@
 import os.log
 
-#warning("Logger to be created")
-func raiseRuntimeWarning(_ message: StaticString) {
-    #if DEBUG
-    var info = Dl_info()
-    dladdr(
-        dlsym(
-            dlopen(nil, RTLD_LAZY),
-            "$s10Foundation15AttributeScopesO7SwiftUIE05swiftE0AcDE0D12UIAttributesVmvg"
-        ),
-        &info
-    )
+public protocol Logger {
+    func raiseRuntimeWarning(_ message: StaticString)
+}
 
-    if let dli_fbase = info.dli_fbase {
-        os_log(
-            .fault,
-            dso: dli_fbase,
-            log: OSLog(
-                subsystem: "com.apple.runtime-issues",
-                category: "Networking"
+struct NetworkLogger: Logger {
+
+    func raiseRuntimeWarning(_ message: StaticString) {
+        #if DEBUG
+        var info = Dl_info()
+        dladdr(
+            dlsym(
+                dlopen(nil, RTLD_LAZY),
+                "$s10Foundation15AttributeScopesO7SwiftUIE05swiftE0AcDE0D12UIAttributesVmvg"
             ),
-            message
+            &info
         )
+
+        if let dli_fbase = info.dli_fbase {
+            os_log(
+                .fault,
+                dso: dli_fbase,
+                log: OSLog(
+                    subsystem: "com.apple.runtime-issues",
+                    category: "Networking"
+                ),
+                message
+            )
+        }
+        #endif
     }
-    #endif
 }

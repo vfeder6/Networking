@@ -7,6 +7,7 @@ public struct NetworkClient<ResponseType: Equatable> {
     private let baseURL: URL
     private let baseHeaders: Headers
     private let decoder: DataDecoder
+    private let logger: Logger?
 
     /// Initializes an instance with a base URL and base headers.
     ///
@@ -14,16 +15,19 @@ public struct NetworkClient<ResponseType: Equatable> {
     /// - Parameter baseURL: The starting base URL
     /// - Parameter baseHeaders: The starting base headers
     /// - Parameter decoder: Entity used to decode the response received from the server
+    /// - Parameter logger: The logger to use
     init(
         networkInterfaced: NetworkInterfaced,
         baseURL: URL,
         baseHeaders: Headers,
-        decoder: DataDecoder
+        decoder: DataDecoder,
+        logger: Logger? = nil
     ) {
         self.networkInterfaced = networkInterfaced
         self.baseURL = baseURL
         self.baseHeaders = baseHeaders
         self.decoder = decoder
+        self.logger = logger
     }
 }
 
@@ -97,7 +101,7 @@ public extension NetworkClient {
         } catch let error as NetworkError {
             return .failure(error)
         } catch {
-            raiseRuntimeWarning(
+            logger?.raiseRuntimeWarning(
                 """
                 Error returned from the server is not a `NetworkError`.
                 Please, raise an issue here: https://github.com/vfeder6/Networking/issues
@@ -210,7 +214,7 @@ private extension NetworkClient {
             endpointURL = baseURL
         } else {
             if endpoint.contains("?") {
-                raiseRuntimeWarning(
+                logger?.raiseRuntimeWarning(
                     """
                     Are you passing an endpoint with already a query item?
                     The endpoint will be url encoded and characters like `?` will be encoded as well, possibly resulting
