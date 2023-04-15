@@ -6,6 +6,12 @@ final class NetworkClientTests: XCTestCase {
 
     func test_urlComposition() async {
         initialize()
+        let logger = NetworkLogger()
+
+        logger.log(.info, "Test info")
+        logger.log(.warning, "Test warning")
+        logger.log(.error, "Test error")
+        logger.log(.critical, "Test critical")
 
         let response = await uut.fullResponseResult(
             from: "endpoint",
