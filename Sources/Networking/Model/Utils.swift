@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// A convenience `protocol` for `Encodable` entities used for network requests.
 public protocol Request: Encodable, Equatable { }
 
@@ -7,6 +9,11 @@ public protocol Response: Decodable, Equatable { }
 /// A convenience `protocol` for Data Transfer Objects (both `Encodable` and `Decodable`) used both for network
 /// requests and responses.
 public protocol DTO: Request & Response { }
+
+/// Protocol representing a media file.
+public protocol Media: Equatable { }
+
+extension Image: Media { }
 
 /// An empty `DTO`, used to ignore the body decoding.
 public struct EmptyDTO: DTO { }

@@ -38,7 +38,7 @@ struct MediaDataDecoder: DataDecoder {
 
         #warning("Fix error")
         guard
-            let decoded = try? responseType.decode(from: data),
+            let decoded = try? MediaDecoder().decode(responseType, from: data),
             let response = decoded as? T
         else { throw NetworkError._unknown }
 
