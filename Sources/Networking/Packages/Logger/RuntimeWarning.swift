@@ -38,11 +38,12 @@ public enum LogKind {
     }
 }
 
-struct NetworkLogger: Logger {
+struct StandardLogger: Logger {
 
     var dateTime: String {
         let components = Calendar.current.dateComponents([.hour, .minute, .second, .nanosecond], from: .init())
-        return "\(components.hour!):\(components.minute!):\(components.second!).\(components.nanosecond!)"
+        let milliseconds = Int(round(Double(components.nanosecond! / 1_000_000)))
+        return "\(components.hour!):\(components.minute!):\(components.second!).\(milliseconds)"
     }
 
     func log(_ kind: LogKind, _ message: String, file: String = #file, line: Int = #line) {

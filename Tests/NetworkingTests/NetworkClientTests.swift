@@ -6,7 +6,7 @@ final class NetworkClientTests: XCTestCase {
 
     func test_urlComposition() async {
         initialize()
-        let logger = NetworkLogger()
+        let logger = StandardLogger()
 
         logger.log(.info, "Test info")
         logger.log(.warning, "Test warning")
