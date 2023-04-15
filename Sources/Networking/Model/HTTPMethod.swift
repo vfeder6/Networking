@@ -1,4 +1,4 @@
-/// The method used for HTTP requests
+/// The method used for HTTP requests.
 public enum HTTPMethod: String {
 
     case get = "GET"

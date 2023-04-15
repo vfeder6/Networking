@@ -1,5 +1,6 @@
 import os.log
 
+#warning("Logger to be created")
 func raiseRuntimeWarning(_ message: StaticString) {
     #if DEBUG
     var info = Dl_info()

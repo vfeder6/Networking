@@ -1,6 +1,6 @@
 import Foundation
 
-/// Raw HTTP response
+/// A raw HTTP response.
 struct HTTPResponse {
 
     public let body: Data

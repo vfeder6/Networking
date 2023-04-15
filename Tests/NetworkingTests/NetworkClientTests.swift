@@ -94,7 +94,7 @@ extension NetworkClientTests {
         .zero
     }
 
-    private var baseHeaders: [String : String] {
+    private var baseHeaders: Headers {
         [:]
     }
 }

@@ -1,8 +1,14 @@
 import Foundation
 import SwiftUI
 
+/// Protocol representing a media file that can be decoded from some `Data`.
 public protocol Media: Equatable {
 
+    /// Method used to decode a media from its data.
+    ///
+    /// - Parameter data: Data to decode the `Media` from.
+    ///
+    /// - Returns: An instance of `Self`.
     static func decode(from data: Data) throws -> Self
 }
 

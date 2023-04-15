@@ -21,6 +21,7 @@ extension Microservice {
     /// Implementation to use with SwiftUI previews.
     ///
     /// This implementation defaults to the mocked one.
+    /// 
     public static var preview: Self {
         mock
     }

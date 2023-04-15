@@ -1,25 +1,24 @@
 import Foundation
 
+/// An error occured while performing a network request.
 public enum NetworkError: Error, Equatable {
 
-    /// Could not cast `URLResponse` as `HTTPURLResponse`
+    /// Cast from `URLResponse` to `HTTPURLResponse` had failed.
     case badURLResponse
 
-    case wrongHTTPResponseType
-
-    /// Status code between the request and response do not match
+    /// Status code between the request and response do not match.
     case mismatchingStatusCodes(expected: Int, actual: Int)
 
-    /// Data received in the response body is not decodable
+    /// Data received in the response body is not decodable.
     case notDecodableData(Data)
 
-    /// Headers were not parseable in the response
+    /// Headers were not parseable in the response.
     case notParseableHeaders
 
-    /// Data passed in the request body failed to be encoded
+    /// Data passed in the request body failed to be encoded.
     case notEncodableData
 
-    /// The response body failed to be decoded into the requested type
+    /// The response body failed to be decoded into the requested type.
     case mismatchingRequestedResponseType
 
     /// Error thrown by `URLSession`

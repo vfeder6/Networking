@@ -4,6 +4,7 @@ import Foundation
 protocol NetworkInterfaced {
 
     /// Sends the given `HTTPRequest` and gives back a `HTTPResponse`.
+    ///
     /// The live implementation of this protocol wraps the `upload(for:from:)` method of `URLSession`.
     ///
     /// - Parameter request: The HTTP request to send
@@ -28,6 +29,7 @@ extension URLSession: NetworkInterfaced {
 
 private extension HTTPRequest {
 
+    /// The `URLRequest` object build from a raw HTTP request.
     var urlRequest: URLRequest {
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = method.rawValue

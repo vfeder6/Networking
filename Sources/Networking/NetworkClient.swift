@@ -5,7 +5,7 @@ public struct NetworkClient<ResponseType: Equatable> {
 
     private let networkInterfaced: NetworkInterfaced
     private let baseURL: URL
-    private let baseHeaders: [String : String]
+    private let baseHeaders: Headers
     private let decoder: DataDecoder
 
     /// Initializes an instance with a base URL and base headers.
@@ -17,7 +17,7 @@ public struct NetworkClient<ResponseType: Equatable> {
     init(
         networkInterfaced: NetworkInterfaced,
         baseURL: URL,
-        baseHeaders: [String : String],
+        baseHeaders: Headers,
         decoder: DataDecoder
     ) {
         self.networkInterfaced = networkInterfaced
@@ -39,7 +39,6 @@ public extension NetworkClient {
     /// - Parameter method: The HTTP method to use
     /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
     /// - Parameter expectedStatusCode: The expected response status code
-    /// - Parameter type: The `Decodable` type expected in the response body
     ///
     /// - Returns: A `NetworkResponse` entity.
     ///
@@ -49,7 +48,7 @@ public extension NetworkClient {
         queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
-        additionalHeaders: [String : String],
+        additionalHeaders: Headers,
         expectedStatusCode: Int
     ) async throws -> NetworkResponse<ResponseType> {
         let request = HTTPRequest(
@@ -76,7 +75,6 @@ public extension NetworkClient {
     /// - Parameter method: The HTTP method to use
     /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
     /// - Parameter expectedStatusCode: The expected response status code
-    /// - Parameter type: The `Decodable` type expected in the response body
     ///
     /// - Returns: A `Result` containing a `NetworkResponse` entity or `NetworkError`.
     func fullResponseResult(
@@ -84,7 +82,7 @@ public extension NetworkClient {
         queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
-        additionalHeaders: [String : String],
+        additionalHeaders: Headers,
         expectedStatusCode: Int
     ) async -> Result<NetworkResponse<ResponseType>, NetworkError> {
         do {
@@ -118,7 +116,6 @@ public extension NetworkClient {
     /// - Parameter method: The HTTP method to use
     /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
     /// - Parameter expectedStatusCode: The expected response status code
-    /// - Parameter type: The `Decodable` type expected in the response body
     ///
     /// - Returns: A `Result` containing the `Response` entity or `NetworkError`.
     func responseResult(
@@ -126,7 +123,7 @@ public extension NetworkClient {
         queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
-        additionalHeaders: [String : String],
+        additionalHeaders: Headers,
         expectedStatusCode: Int
     ) async -> Result<ResponseType, NetworkError> {
         let result = await fullResponseResult(
@@ -150,6 +147,7 @@ public extension NetworkClient {
     }
 
     /// Performs a network request, returning the error if present.
+    ///
     /// The body decoding is ignored only if the declared `ResponseType` is of type `EmptyModel`.
     ///
     /// - Parameter endpoint: The endpoint to append to `baseURL`
@@ -159,13 +157,13 @@ public extension NetworkClient {
     /// - Parameter additionalHeaders: Headers to append to `baseHeaders`
     /// - Parameter expectedStatusCode: The expected response status code
     ///
-    /// - Returns: A `Result` containing `Void` or `NetworkError`.
+    /// - Returns: A `Result` containing `Void` if success, or `NetworkError`.
     func emptyResult(
         to endpoint: String,
-        with queryItems: [URLQueryItem],
+        queryItems: [URLQueryItem],
         body: (any Request)?,
         method: HTTPMethod,
-        additionalHeaders: [String : String],
+        additionalHeaders: Headers,
         expectedStatusCode: Int
     ) async -> Result<Void, NetworkError> {
         let result = await fullResponseResult(
@@ -190,16 +188,21 @@ public extension NetworkClient {
 
 private extension NetworkClient {
 
-    func composeHeaders(_ additionalHeaders: [String : String]?) -> [String : String] {
-        var allHeaders = baseHeaders
-        additionalHeaders.map { headers in
-            headers.forEach { header in
-                allHeaders[header.key] = header.value
-            }
-        }
-        return allHeaders
+    /// Creates the new headers adding to `baseHeaders` some additional ones.
+    ///
+    /// - Parameter additionalHeaders: Headers to add to `baseHeaders`
+    ///
+    /// - Returns: The new headers.
+    func composeHeaders(_ additionalHeaders: Headers) -> Headers {
+        baseHeaders + additionalHeaders
     }
 
+    /// Composes the url, starting from the `baseURL` and concatenating the `endpoint` and the `queryItems`
+    ///
+    /// - Parameter endpoint: The endpoint to add
+    /// - Parameter queryItesms: Query items to append at the end of the `URL`
+    ///
+    /// - Returns: The new `URL`
     func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
         let endpointURL: URL
 
@@ -222,6 +225,13 @@ private extension NetworkClient {
         return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
     }
 
+    /// Encodes the body using JavaScript Object Notation as encoding strategy.
+    ///
+    /// - Parameter request: The `Encodable` model to encode
+    ///
+    /// - Returns: The encoded `Data`
+    ///
+    /// - Throws: A `NetworkError` type
     func encodeBody(_ request: (any Request)?) throws -> Data? {
         try request.map { body in
             guard let data = try? JSONEncoder().encode(body)
@@ -235,6 +245,14 @@ private extension NetworkClient {
 
 private extension NetworkClient {
 
+    /// Processes the raw response obtained from the server.
+    ///
+    /// - Parameter response: The raw response
+    /// - Parameter expectedStatusCode: The expected status code from the server.
+    ///
+    /// - Returns: A `NetworkResponse` type
+    ///
+    /// - Throws: A `NetworkError` type
     func process(
         response: HTTPResponse,
         expectedStatusCode: Int
@@ -245,7 +263,7 @@ private extension NetworkClient {
         guard urlResponse.statusCode == expectedStatusCode
         else { throw NetworkError.mismatchingStatusCodes(expected: expectedStatusCode, actual: urlResponse.statusCode) }
 
-        guard let headers = urlResponse.allHeaderFields as? [String : String]
+        guard let headers = urlResponse.allHeaderFields as? Headers
         else { throw NetworkError.notParseableHeaders }
 
         guard ResponseType.Type.self != EmptyDTO.self
@@ -260,19 +278,25 @@ private extension NetworkClient {
 
 // MARK: - Instances
 
-extension NetworkClient {
+public extension NetworkClient {
 
-    /// Creates a live instance of `NetworkClient`.
+    /// Creates a live instance of `NetworkClient` using JavaScript Object Notation as the body decoding strategy.
     ///
     /// - Parameter baseURL: The base URL
     /// - Parameter baseHeaders: The base headers
     ///
-    /// - Returns: The live instance of `NetworkClient`.
-    public static func json(baseURL: URL, baseHeaders: [String : String] = [:]) -> Self {
+    /// - Returns: A live instance of `NetworkClient`.
+    static func json(baseURL: URL, baseHeaders: Headers = [:]) -> Self {
         .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders, decoder: JSONDataDecoder())
     }
 
-    public static func media(baseURL: URL, baseHeaders: [String : String] = [:]) -> Self {
+    /// Creates a live instance of `NetworkClient` assuming that the body is a `Media`-compatible type.
+    ///
+    /// - Parameter baseURL: The base URL
+    /// - Parameter baseHeaders: The base headers
+    ///
+    /// - Returns: A live instance of `NetworkClient`.
+    static func media(baseURL: URL, baseHeaders: Headers = [:]) -> Self {
         .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders, decoder: MediaDataDecoder())
     }
 }

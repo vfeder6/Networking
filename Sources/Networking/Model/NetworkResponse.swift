@@ -1,9 +1,14 @@
 import Foundation
 
-/// The response from the network request
+/// The response from the network request.
 public struct NetworkResponse<Body: Equatable>: Equatable {
 
-    public let headers: [String : String]
+    /// The headers of the response.
+    public let headers: Headers
+
+    /// The body of the response.
     public let body: Body?
+
+    /// The URL the response came from.
     let url: URL?
 }

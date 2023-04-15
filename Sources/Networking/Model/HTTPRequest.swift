@@ -1,10 +1,10 @@
 import Foundation
 
-/// Raw HTTP request
+/// A raw HTTP request.
 struct HTTPRequest {
 
     let url: URL
     let method: HTTPMethod
-    let headers: [String : String]
+    let headers: Headers
     let body: Data?
 }

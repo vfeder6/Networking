@@ -1,10 +1,21 @@
 import Foundation
 
+/// A protocol providing a method that decodes some `Data` into a concrete type.
 protocol DataDecoder {
+
+    /// Decodes the given data into a type.
+    ///
+    /// - Parameter type: The type to decode the data into.
+    /// - Parameter data: Data to decode.
+    ///
+    /// - Returns: An instance of the given type.
+    ///
+    /// - Throws: A `DataDecodingError` type.
     func decode<T>(_ type: T.Type, from data: Data) throws -> T
 }
 
 struct JSONDataDecoder: DataDecoder {
+
     func decode<T>(_ type: T.Type, from data: Data) throws -> T {
         guard let responseType = type as? any Response.Type
         else { throw NetworkError._unknown }
@@ -20,6 +31,7 @@ struct JSONDataDecoder: DataDecoder {
 }
 
 struct MediaDataDecoder: DataDecoder {
+
     func decode<T>(_ type: T.Type, from data: Data) throws -> T {
         guard let responseType = type as? any Media.Type
         else { throw NetworkError._unknown }
