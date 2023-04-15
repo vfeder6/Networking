@@ -10,11 +10,6 @@ public protocol Response: Decodable, Equatable { }
 /// requests and responses.
 public protocol DTO: Request & Response { }
 
-/// Protocol representing a media file.
-public protocol Media: Equatable { }
-
-extension Image: Media { }
-
 /// An empty `DTO`, used to ignore the body decoding.
 public struct EmptyDTO: DTO { }
 

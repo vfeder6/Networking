@@ -20,11 +20,10 @@ struct JSONDataDecoder: DataDecoder {
         guard let responseType = type as? any Response.Type
         else { throw NetworkError._unknown }
 
-        #warning("Fix error")
         guard
             let decoded = try? JSONDecoder().decode(responseType, from: data),
             let response = decoded as? T
-        else { throw NetworkError._unknown }
+        else { throw DataDecodingError.notDecodableJSON }
 
         return response
     }
@@ -36,11 +35,10 @@ struct MediaDataDecoder: DataDecoder {
         guard let responseType = type as? any Media.Type
         else { throw NetworkError._unknown }
 
-        #warning("Fix error")
         guard
             let decoded = try? MediaDecoder().decode(responseType, from: data),
             let response = decoded as? T
-        else { throw NetworkError._unknown }
+        else { throw DataDecodingError.notDecodableMedia }
 
         return response
     }
