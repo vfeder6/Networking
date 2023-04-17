@@ -1,5 +1,3 @@
-import SwiftUI
-
 /// A convenience `protocol` for `Encodable` entities used for network requests.
 public protocol Request: Encodable, Equatable { }
 

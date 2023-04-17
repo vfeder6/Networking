@@ -21,7 +21,7 @@ public struct NetworkClient<ResponseType: Equatable> {
         baseURL: URL,
         baseHeaders: Headers,
         decoder: DataDecoder,
-        logger: Logger? = nil
+        logger: Logger?
     ) {
         self.networkInterfaced = networkInterfaced
         self.baseURL = baseURL
@@ -62,7 +62,16 @@ public extension NetworkClient {
             body: try encodeBody(body)
         )
 
-        let response = try await networkInterfaced.send(request: request)
+        logger?.log(.info, "Starting the network request")
+
+        let response: HTTPResponse
+
+        do {
+            response = try await networkInterfaced.send(request: request)
+        } catch {
+            logger?.log(.error, "Got error while performing the network request: \(error)")
+            throw error
+        }
         return try process(response: response, expectedStatusCode: expectedStatusCode)
     }
 }
@@ -198,7 +207,8 @@ private extension NetworkClient {
     ///
     /// - Returns: The new headers.
     func composeHeaders(_ additionalHeaders: Headers) -> Headers {
-        baseHeaders + additionalHeaders
+        logger?.log(.debug, "Composing headers")
+        return baseHeaders + additionalHeaders
     }
 
     /// Composes the url, starting from the `baseURL` and concatenating the `endpoint` and the `queryItems`
@@ -214,6 +224,7 @@ private extension NetworkClient {
             endpointURL = baseURL
         } else {
             if endpoint.contains("?") {
+                logger?.log(.warning, "Found a question mark (?) in URL before appending query items")
                 logger?.raiseRuntimeWarning(
                     """
                     Are you passing an endpoint with already a query item?
@@ -226,7 +237,11 @@ private extension NetworkClient {
             }
             endpointURL = baseURL.appending(path: endpoint)
         }
-        return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+
+        let finalURL = queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+
+        logger?.log(.debug, "Correctly composed URL: \(finalURL.absoluteString)")
+        return finalURL
     }
 
     /// Encodes the body using JavaScript Object Notation as encoding strategy.
@@ -238,8 +253,12 @@ private extension NetworkClient {
     /// - Throws: A `NetworkError` type
     func encodeBody(_ request: (any Request)?) throws -> Data? {
         try request.map { body in
-            guard let data = try? JSONEncoder().encode(body)
-            else { throw NetworkError.notEncodableData }
+            guard let data = try? JSONEncoder().encode(body) else {
+                logger?.log(.error, "Provided data is not encodable")
+                throw NetworkError.notEncodableData
+            }
+
+            logger?.log(.debug, "Correctly encoded body")
             return data
         }
     }
@@ -261,21 +280,32 @@ private extension NetworkClient {
         response: HTTPResponse,
         expectedStatusCode: Int
     ) throws -> NetworkResponse<ResponseType> {
-        guard let urlResponse = response.urlResponse as? HTTPURLResponse
-        else { throw NetworkError.badURLResponse }
+        guard let urlResponse = response.urlResponse as? HTTPURLResponse else {
+            logger?.log(.critical, "Could not cast URLResponse to HTTPURLResponse")
+            throw NetworkError.badURLResponse
+        }
 
-        guard urlResponse.statusCode == expectedStatusCode
-        else { throw NetworkError.mismatchingStatusCodes(expected: expectedStatusCode, actual: urlResponse.statusCode) }
+        guard urlResponse.statusCode == expectedStatusCode else {
+            logger?.log(.error, "Wrong status code, expected \(expectedStatusCode) but got \(urlResponse.statusCode)")
+            throw NetworkError.mismatchingStatusCodes(expected: expectedStatusCode, actual: urlResponse.statusCode)
+        }
 
-        guard let headers = urlResponse.allHeaderFields as? Headers
-        else { throw NetworkError.notParseableHeaders }
+        guard let headers = urlResponse.allHeaderFields as? Headers else {
+            logger?.log(.error, "Not parseable headers from response")
+            throw NetworkError.notParseableHeaders
+        }
 
-        guard ResponseType.Type.self != EmptyDTO.self
-        else { return .init(headers: headers, body: nil, url: urlResponse.url) }
+        guard ResponseType.Type.self != EmptyDTO.self else {
+            logger?.log(.debug, "Ignoring body decoding")
+            return .init(headers: headers, body: nil, url: urlResponse.url)
+        }
 
-        guard let decoded = try? decoder.decode(ResponseType.self, from: response.body)
-        else { throw NetworkError.notDecodableData(response.body) }
+        guard let decoded = try? decoder.decode(ResponseType.self, from: response.body) else {
+            logger?.log(.error, "Could not decode type \(String(describing: ResponseType.self)) from response body")
+            throw NetworkError.notDecodableData(response.body)
+        }
 
+        logger?.log(.info, "Response correctly processed")
         return .init(headers: headers, body: decoded, url: urlResponse.url)
     }
 }
@@ -290,8 +320,14 @@ public extension NetworkClient {
     /// - Parameter baseHeaders: The base headers
     ///
     /// - Returns: A live instance of `NetworkClient`.
-    static func json(baseURL: URL, baseHeaders: Headers = [:]) -> Self {
-        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders, decoder: JSONDataDecoder())
+    static func json(baseURL: URL, baseHeaders: Headers = [:], logger: Logger? = .init()) -> Self {
+        .init(
+            networkInterfaced: URLSession.shared,
+            baseURL: baseURL,
+            baseHeaders: baseHeaders,
+            decoder: JSONDataDecoder(),
+            logger: logger
+        )
     }
 
     /// Creates a live instance of `NetworkClient` assuming that the body is a `Media`-compatible type.
@@ -300,7 +336,13 @@ public extension NetworkClient {
     /// - Parameter baseHeaders: The base headers
     ///
     /// - Returns: A live instance of `NetworkClient`.
-    static func media(baseURL: URL, baseHeaders: Headers = [:]) -> Self {
-        .init(networkInterfaced: URLSession.shared, baseURL: baseURL, baseHeaders: baseHeaders, decoder: MediaDataDecoder())
+    static func media(baseURL: URL, baseHeaders: Headers = [:], logger: Logger? = .init()) -> Self {
+        .init(
+            networkInterfaced: URLSession.shared,
+            baseURL: baseURL,
+            baseHeaders: baseHeaders,
+            decoder: MediaDataDecoder(),
+            logger: logger
+        )
     }
 }

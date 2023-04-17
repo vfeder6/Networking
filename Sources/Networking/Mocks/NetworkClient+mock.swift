@@ -23,7 +23,8 @@ public extension NetworkClient {
             ),
             baseURL: .init(string: "https://example.com")!,
             baseHeaders: [:],
-            decoder: MockDataDecoder(model: result.discarded)
+            decoder: MockDataDecoder(model: result.discarded),
+            logger: Logger()
         )
     }
 }
