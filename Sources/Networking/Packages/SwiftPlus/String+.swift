@@ -4,4 +4,14 @@ public extension String {
     static var empty: Self {
         ""
     }
+
+    func repeating(times: Int) -> Self {
+        var copy: String = ""
+
+        for _ in 0 ..< times {
+            copy += self
+        }
+
+        return copy
+    }
 }

@@ -77,24 +77,24 @@ final class NetworkClientTests: XCTestCase {
     }
 }
 
-extension NetworkClientTests {
-    private var model: EmptyMockModel {
+private extension NetworkClientTests {
+    var model: EmptyMockModel {
         .init()
     }
 
-    private var url: URL {
+    var url: URL {
         .init(string: "https://example.com")!
     }
 
-    private var statusCode: Int {
+    var statusCode: Int {
         200
     }
 
-    private var delay: Duration {
+    var delay: Duration {
         .zero
     }
 
-    private var baseHeaders: Headers {
+    var baseHeaders: Headers {
         [:]
     }
 }
