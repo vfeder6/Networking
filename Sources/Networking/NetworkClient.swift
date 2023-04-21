@@ -44,7 +44,7 @@ extension NetworkClient {
         expectedStatusCode: Int
     ) async throws -> NetworkResponse<R> {
         let request = HTTPRequest(
-            url: composeURL(endpoint, queryItems: queryItems),
+            url: try composeURL(endpoint, queryItems: queryItems),
             method: method,
             headers: composeHeaders(additionalHeaders),
             body: try encodeBody(body)
@@ -188,7 +188,7 @@ extension NetworkClient {
         return allHeaders
     }
 
-    private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
+    private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) throws -> URL {
         let endpointURL: URL
 
         if endpoint == "" {
@@ -205,9 +205,24 @@ extension NetworkClient {
                     """
                 )
             }
-            endpointURL = host.appending(path: endpoint)
+            if #available(macOS 13.0, iOS 16.0, *) {
+                endpointURL = host.appending(path: endpoint)
+            } else {
+                endpointURL = host.appendingPathComponent(endpoint)
+            }
         }
-        return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+        if #available(macOS 13.0, iOS 16.0, *) {
+            return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+        } else if var urlComponents = URLComponents(url: endpointURL, resolvingAgainstBaseURL: true) {
+            urlComponents.queryItems = queryItems
+            if let url = urlComponents.url {
+                return url
+            } else {
+                throw NetworkError.urlNotComposable
+            }
+        } else {
+            throw NetworkError.urlNotComposable
+        }
     }
 
     private func encodeBody(_ request: (any Request)?) throws -> Data? {

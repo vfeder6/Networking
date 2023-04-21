@@ -29,6 +29,9 @@ public enum NetworkError: Error {
     /// Error thrown by `URLSession`
     case urlSession(description: String)
 
+    /// URL could not be composed (thrown only if iOS version is less than 16 or macOS version is less than 13)
+    case urlNotComposable
+
     /// ⚠️ Error that should not be returned to the client ⚠️
     ///
     /// In case that the `fullResponseResult` method of `NetworkClient` cannot cast `Error` to `NetworkError`, that

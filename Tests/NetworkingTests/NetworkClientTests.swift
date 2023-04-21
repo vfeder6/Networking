@@ -73,41 +73,66 @@ final class NetworkClientTests: XCTestCase {
     }
 
     private func initialize() {
-        uut = .init(
-            networkInterfaced: URLSessionMock(
-                response: .success(encodedModel),
-                expectedStatusCode: statusCode,
-                respondsAfter: delay
-            ),
-            baseURL: url,
-            baseHeaders: baseHeaders
-        )
+        if #available(macOS 13.0, iOS 16.0, *) {
+            uut = .init(
+                networkInterfaced: URLSessionMock(
+                    response: .success(encodedModel),
+                    expectedStatusCode: statusCode,
+                    respondsAfter: delay
+                ),
+                baseURL: url,
+                baseHeaders: baseHeaders
+            )
+        } else {
+            uut = .init(
+                networkInterfaced: LegacyURLSessionMock(
+                    response: .success(encodedModel),
+                    expectedStatusCode: statusCode,
+                    respondsAfter: legacyDelay
+                ),
+                baseURL: url,
+                baseHeaders: baseHeaders
+            )
+        }
     }
 }
 
-extension NetworkClientTests {
-    private var model: EmptyModel {
+private extension NetworkClientTests {
+    var model: EmptyModel {
         .init()
     }
 
-    private var encodedModel: Data {
+    var encodedModel: Data {
         try! JSONEncoder().encode(model)
     }
 
-    private var url: URL {
+    var url: URL {
         .init(string: "https://example.com")!
     }
 
-    private var statusCode: Int {
+    var statusCode: Int {
         200
     }
 
-    private var delay: Duration {
+
+
+    var baseHeaders: [String : String] {
+        [:]
+    }
+}
+
+@available(macOS 13.0, iOS 16.0, *)
+private extension NetworkClientTests {
+    var delay: Duration {
         .zero
     }
+}
 
-    private var baseHeaders: [String : String] {
-        [:]
+@available(iOS, deprecated: 16, renamed: "delay")
+@available(macOS, deprecated: 13, renamed: "delay")
+private extension NetworkClientTests {
+    var legacyDelay: Double {
+        .zero
     }
 }
 
