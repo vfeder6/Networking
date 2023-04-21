@@ -21,6 +21,8 @@ public enum NetworkError: Error, Equatable {
     /// The response body failed to be decoded into the requested type.
     case mismatchingRequestedResponseType
 
+    case urlNotComposable
+
     /// Error thrown by `URLSession`
     case urlSession(description: String)
 

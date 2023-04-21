@@ -99,4 +99,19 @@ private extension NetworkClientTests {
     }
 }
 
-private struct EmptyMockModel: Response { }
+@available(macOS 13.0, iOS 16.0, *)
+private extension NetworkClientTests {
+    var delay: Duration {
+        .zero
+    }
+}
+
+@available(iOS, deprecated: 16.0, renamed: "delay")
+@available(macOS, deprecated: 13.0, renamed: "delay")
+private extension NetworkClientTests {
+    var legacyDelay: Double {
+        .zero
+    }
+}
+
+private struct EmptyMockModel: DTO { }

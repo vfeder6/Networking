@@ -56,7 +56,7 @@ public extension NetworkClient {
         expectedStatusCode: Int
     ) async throws -> NetworkResponse<ResponseType> {
         let request = HTTPRequest(
-            url: composeURL(endpoint, queryItems: queryItems),
+            url: try composeURL(endpoint, queryItems: queryItems),
             method: method,
             headers: composeHeaders(additionalHeaders),
             body: try encodeBody(body)
@@ -217,7 +217,7 @@ private extension NetworkClient {
     /// - Parameter queryItesms: Query items to append at the end of the `URL`
     ///
     /// - Returns: The new `URL`
-    func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) -> URL {
+    private func composeURL(_ endpoint: String, queryItems: [URLQueryItem]) throws -> URL {
         let endpointURL: URL
 
         if endpoint == "" {
@@ -235,13 +235,55 @@ private extension NetworkClient {
                     """
                 )
             }
-            endpointURL = baseURL.appending(path: endpoint)
+            if #available(macOS 13.0, iOS 16.0, *) {
+                endpointURL = baseURL.appending(path: endpoint)
+            } else {
+                endpointURL = baseURL.appendingPathComponent(endpoint)
+            }
         }
 
-        let finalURL = queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
+        if #available(macOS 13.0, iOS 16.0, *) {
+            let finalURL = queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
 
-        logger?.log(.debug, "Correctly composed URL: \(finalURL.absoluteString)")
-        return finalURL
+            logger?.log(.debug, "Correctly composed URL: \(finalURL.absoluteString)")
+            return finalURL
+        } else {
+            return try appendQueryItems(to: endpointURL, queryItems)
+        }
+    }
+
+    @available(macOS, deprecated: 13.0, message: "Method `composeURL` aleady gets the job done")
+    @available(iOS, deprecated: 16.0, message: "Method `composeURL` aleady gets the job done")
+    private func appendQueryItems(to endpointURL: URL, _ queryItems: [URLQueryItem]) throws -> URL {
+        guard var urlComponents = URLComponents(url: endpointURL, resolvingAgainstBaseURL: true)
+        else { throw NetworkError.urlNotComposable }
+
+        urlComponents.queryItems = queryItems
+
+        guard let url = urlComponents.url
+        else { throw NetworkError.urlNotComposable }
+
+        var correctURL: URL
+
+        if url.absoluteString.contains("?") && queryItems.isEmpty {
+            let wrongURLString = url.absoluteString
+
+            guard let questionMarkIndex = url.absoluteString.lastIndex(of: "?")
+            else { throw NetworkError.urlNotComposable }
+
+            let previousIndex = url.absoluteString.index(questionMarkIndex, offsetBy: -1)
+            let urlString = wrongURLString[wrongURLString.startIndex...previousIndex]
+
+            if let url = URL(string: String(urlString)) {
+                correctURL = url
+            } else {
+                throw NetworkError.urlNotComposable
+            }
+        } else {
+            correctURL = url
+        }
+
+        return correctURL
     }
 
     /// Encodes the body using JavaScript Object Notation as encoding strategy.
