@@ -11,8 +11,8 @@ public extension NetworkClient {
     ///
     /// - Returns: The mocked `NetworkClient` instance.
     @available(macOS 13.0, iOS 16.0, *)
-    static func mock<R: Response>(
-        returning result: Result<R, NetworkError>,
+    static func mock(
+        returning result: Result<ResponseType, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Duration = .zero
     ) -> Self {
@@ -34,13 +34,13 @@ public extension NetworkClient {
     /// - Parameter result: The desired response
     /// - Parameter statusCode: The desired status code
     /// - Parameter sleepDuration: The amount of time the current `Task` has to sleep before returning the mocked data,
-    /// simulating a delay from the server
+    /// simulating a delay from the server, in seconds.
     ///
     /// - Returns: The mocked `NetworkClient` instance.
     @available(iOS, deprecated: 16.0, renamed: "mock")
     @available(macOS, deprecated: 13.0, renamed: "mock")
-    static func legacyMock<R: Response>(
-        returning result: Result<R, NetworkError>,
+    static func legacyMock(
+        returning result: Result<ResponseType, NetworkError>,
         expecting statusCode: Int,
         after sleepDuration: Double = .zero
     ) -> Self {
