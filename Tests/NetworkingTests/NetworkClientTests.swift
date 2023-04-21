@@ -73,7 +73,11 @@ final class NetworkClientTests: XCTestCase {
     }
 
     private func initialize() {
-        uut = .mock(returning: .success(.init()), expecting: statusCode)
+        if #available(macOS 13.0, iOS 16.0, *) {
+            uut = .mock(returning: .success(model), expecting: statusCode)
+        } else {
+            uut = .legacyMock(returning: .success(model), expecting: statusCode)
+        }
     }
 }
 
@@ -88,10 +92,6 @@ private extension NetworkClientTests {
 
     var statusCode: Int {
         200
-    }
-
-    var delay: Duration {
-        .zero
     }
 
     var baseHeaders: Headers {
