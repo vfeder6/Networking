@@ -35,8 +35,8 @@ extension NetworkClient {
     /// - Returns: The mocked NetworkClient instance.
     ///
     /// - Throws: The error passed in `result`, if it's `.failure`.
-    @available(iOS, deprecated: 16, renamed: "mock")
-    @available(macOS, deprecated: 13, renamed: "mock")
+    @available(iOS, deprecated: 16.0, renamed: "mock")
+    @available(macOS, deprecated: 13.0, renamed: "mock")
     public static func legacyMock<Response: DTO>(
         returning result: Result<Response, NetworkError>,
         expecting statusCode: Int,

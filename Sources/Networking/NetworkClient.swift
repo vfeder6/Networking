@@ -211,10 +211,12 @@ extension NetworkClient {
                 endpointURL = host.appendingPathComponent(endpoint)
             }
         }
+
         if #available(macOS 13.0, iOS 16.0, *) {
             return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
         } else if var urlComponents = URLComponents(url: endpointURL, resolvingAgainstBaseURL: true) {
             urlComponents.queryItems = queryItems
+
             if let url = urlComponents.url {
                 return url
             } else {

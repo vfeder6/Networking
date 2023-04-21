@@ -54,7 +54,12 @@ final class NetworkClientTests: XCTestCase {
             expectedStatusCode: 200
         )
 
-        XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
+        if #available(macOS 13, iOS 16, *) {
+            XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
+        } else {
+            let url = URL(string: url.absoluteString + "?")
+            XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
+        }
     }
 
     func test_failure_mismatchingStatusCodes() async {
@@ -114,8 +119,6 @@ private extension NetworkClientTests {
         200
     }
 
-
-
     var baseHeaders: [String : String] {
         [:]
     }
@@ -128,8 +131,8 @@ private extension NetworkClientTests {
     }
 }
 
-@available(iOS, deprecated: 16, renamed: "delay")
-@available(macOS, deprecated: 13, renamed: "delay")
+@available(iOS, deprecated: 16.0, renamed: "delay")
+@available(macOS, deprecated: 13.0, renamed: "delay")
 private extension NetworkClientTests {
     var legacyDelay: Double {
         .zero

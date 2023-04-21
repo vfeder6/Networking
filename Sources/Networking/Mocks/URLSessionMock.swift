@@ -47,8 +47,8 @@ struct URLSessionMock: NetworkInterfaced {
 }
 
 /// Entity that simulates the `URLSession` behavior.
-@available(macOS, deprecated: 13, renamed: "URLSessionMock")
-@available(iOS, deprecated: 16, renamed: "URLSessionMock")
+@available(macOS, deprecated: 13.0, renamed: "URLSessionMock")
+@available(iOS, deprecated: 16.0, renamed: "URLSessionMock")
 struct LegacyURLSessionMock: NetworkInterfaced {
     private let response: Result<Data, NetworkError>
     private let expectedStatusCode: Int
