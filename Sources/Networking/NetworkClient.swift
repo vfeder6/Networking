@@ -214,17 +214,43 @@ extension NetworkClient {
 
         if #available(macOS 13.0, iOS 16.0, *) {
             return queryItems.isEmpty ? endpointURL : endpointURL.appending(queryItems: queryItems)
-        } else if var urlComponents = URLComponents(url: endpointURL, resolvingAgainstBaseURL: true) {
-            urlComponents.queryItems = queryItems
+        } else {
+            return try appendQueryItems(to: endpointURL, queryItems)
+        }
+    }
 
-            if let url = urlComponents.url {
-                return url
+    @available(macOS, deprecated: 13.0, message: "Method `composeURL` aleady gets the job done")
+    @available(iOS, deprecated: 16.0, message: "Method `composeURL` aleady gets the job done")
+    private func appendQueryItems(to endpointURL: URL, _ queryItems: [URLQueryItem]) throws -> URL {
+        guard var urlComponents = URLComponents(url: endpointURL, resolvingAgainstBaseURL: true)
+        else { throw NetworkError.urlNotComposable }
+
+        urlComponents.queryItems = queryItems
+
+        guard let url = urlComponents.url
+        else { throw NetworkError.urlNotComposable }
+
+        var correctURL: URL
+
+        if url.absoluteString.contains("?") && queryItems.isEmpty {
+            let wrongURLString = url.absoluteString
+
+            guard let questionMarkIndex = url.absoluteString.lastIndex(of: "?")
+            else { throw NetworkError.urlNotComposable }
+
+            let previousIndex = url.absoluteString.index(questionMarkIndex, offsetBy: -1)
+            let urlString = wrongURLString[wrongURLString.startIndex...previousIndex]
+
+            if let url = URL(string: String(urlString)) {
+                correctURL = url
             } else {
                 throw NetworkError.urlNotComposable
             }
         } else {
-            throw NetworkError.urlNotComposable
+            correctURL = url
         }
+
+        return correctURL
     }
 
     private func encodeBody(_ request: (any Request)?) throws -> Data? {

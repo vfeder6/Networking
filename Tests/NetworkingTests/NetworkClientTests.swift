@@ -54,12 +54,7 @@ final class NetworkClientTests: XCTestCase {
             expectedStatusCode: 200
         )
 
-        if #available(macOS 13, iOS 16, *) {
-            XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
-        } else {
-            let url = URL(string: url.absoluteString + "?")
-            XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
-        }
+        XCTAssertEqual(response, .success(.init(headers: [:], body: model, url: url)))
     }
 
     func test_failure_mismatchingStatusCodes() async {
