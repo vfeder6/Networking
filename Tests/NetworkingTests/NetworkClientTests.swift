@@ -2,7 +2,7 @@ import XCTest
 @testable import Networking
 
 final class NetworkClientTests: XCTestCase {
-    private var uut: NetworkClient<EmptyModel>!
+    private var uut: NetworkClient<EmptyMockModel>!
 
     func test_urlComposition() async {
         initialize()
@@ -74,36 +74,16 @@ final class NetworkClientTests: XCTestCase {
 
     private func initialize() {
         if #available(macOS 13.0, iOS 16.0, *) {
-            uut = .init(
-                networkInterfaced: URLSessionMock(
-                    response: .success(encodedModel),
-                    expectedStatusCode: statusCode,
-                    respondsAfter: delay
-                ),
-                baseURL: url,
-                baseHeaders: baseHeaders
-            )
+            uut = .mock(returning: .success(model), expecting: statusCode)
         } else {
-            uut = .init(
-                networkInterfaced: LegacyURLSessionMock(
-                    response: .success(encodedModel),
-                    expectedStatusCode: statusCode,
-                    respondsAfter: legacyDelay
-                ),
-                baseURL: url,
-                baseHeaders: baseHeaders
-            )
+            uut = .legacyMock(returning: .success(model), expecting: statusCode)
         }
     }
 }
 
 private extension NetworkClientTests {
-    var model: EmptyModel {
+    var model: EmptyMockModel {
         .init()
-    }
-
-    var encodedModel: Data {
-        try! JSONEncoder().encode(model)
     }
 
     var url: URL {
@@ -114,7 +94,7 @@ private extension NetworkClientTests {
         200
     }
 
-    var baseHeaders: [String : String] {
+    var baseHeaders: Headers {
         [:]
     }
 }
@@ -134,4 +114,4 @@ private extension NetworkClientTests {
     }
 }
 
-private struct EmptyModel: DTO { }
+private struct EmptyMockModel: DTO { }
